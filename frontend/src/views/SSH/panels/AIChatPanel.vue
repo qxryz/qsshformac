@@ -553,12 +553,12 @@ onUnmounted(() => {
 .ai-main { flex:1; display:flex; flex-direction:column; min-height:0; overflow:hidden }
 
 /* 头部 */
-.ai-header { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--bg-tooltip, rgba(28, 28, 28, 0.98)); border-bottom:1px solid var(--border-subtle); flex-shrink:0 }
+.ai-header { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--toolbar-3); border-bottom:1px solid var(--border-subtle); flex-shrink:0 }
 .header-left { display:flex; align-items:center; gap:8px }
 .header-title { color:var(--text-primary); font-weight:600; font-size:13px }
 .badge { font-size:10px; padding:2px 6px; border-radius:3px; font-family:monospace }
-.badge.warn { color:var(--accent-danger); background:var(--danger-bg, rgba(252, 129, 129, 0.1)) }
-.badge.ok { color:var(--success-light); background:var(--success-bg, rgba(72, 187, 120, 0.1)) }
+.badge.warn { color:var(--accent-danger); background:var(--danger-bg) }
+.badge.ok { color:var(--success-light); background:var(--success-bg) }
 .header-right { display:flex; gap:2px }
 .hbtn { background:none; border:none; color:var(--text-muted); cursor:pointer; padding:6px; border-radius:4px; display:flex; transition:all .15s }
 .hbtn:hover { background:var(--border-subtle); color:var(--text-primary) }
@@ -580,8 +580,8 @@ onUnmounted(() => {
 .bubble { display:flex; gap:10px; animation:msgIn .25s ease-out }
 @keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 .bubble.user { justify-content:flex-end }
-.bavatar { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:10px; font-weight:700; background:var(--primary-bg, rgba(66, 153, 225, 0.12)); color:var(--primary-light) }
-.bavatar.u { background:var(--success-bg, rgba(72, 187, 120, 0.12)); color:var(--success-light) }
+.bavatar { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:10px; font-weight:700; background:var(--primary-bg); color:var(--primary-light) }
+.bavatar.u { background:var(--success-bg); color:var(--success-light) }
 .bbody { max-width:80%; min-width:0; display:flex; flex-direction:column }
 .bubble.user .bbody { align-items:flex-end }
 .bcontent { padding:10px 14px; border-radius:10px; background:var(--bg-panel); color:var(--text-primary); line-height:1.7; word-break:break-word; border:1px solid var(--surface-1) }
@@ -644,13 +644,13 @@ onUnmounted(() => {
 .ap-item+.ap-item { border-top:1px solid var(--surface-1) }
 .ap-cmd { flex:1; color:var(--text-primary); font-family:'Cascadia Code','Fira Code',monospace; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
 .ap-btns { display:flex; gap:6px; flex-shrink:0 }
-.ap-deny { padding:4px 12px; background:var(--danger-bg, rgba(245, 101, 101, 0.1)); border:1px solid var(--danger-bg); border-radius:5px; color:var(--accent-danger); font-size:12px; cursor:pointer; transition:all .15s }
+.ap-deny { padding:4px 12px; background:var(--danger-bg); border:1px solid var(--border-danger); border-radius:5px; color:var(--accent-danger); font-size:12px; cursor:pointer; transition:all .15s }
 .ap-deny:hover { background:var(--danger-bg) }
-.ap-ok { padding:4px 12px; background:var(--success-bg, rgba(72, 187, 120, 0.15)); border:1px solid var(--border-success, rgba(72, 187, 120, 0.3)); border-radius:5px; color:var(--success-light); font-size:12px; cursor:pointer; transition:all .15s }
-.ap-ok:hover { background:var(--success-bg, rgba(72, 187, 120, 0.25)) }
+.ap-ok { padding:4px 12px; background:var(--success-bg); border:1px solid var(--border-success); border-radius:5px; color:var(--success-light); font-size:12px; cursor:pointer; transition:all .15s }
+.ap-ok:hover { background:var(--success-bg) }
 
 /* 输入区 */
-.ai-input { padding:12px 14px; background:var(--bg-tooltip, rgba(28, 28, 28, 0.98)); border-top:1px solid var(--border-subtle); flex-shrink:0 }
+.ai-input { padding:12px 14px; background:var(--toolbar-3); border-top:1px solid var(--border-subtle); flex-shrink:0 }
 .in-bar { display:flex; align-items:center; gap:6px; margin-bottom:8px }
 .bar-spacer { flex:1 }
 .chip { display:flex; align-items:center; gap:4px; padding:3px 10px; background:var(--surface-1); border:1px solid var(--border-default); border-radius:6px; color:var(--text-muted); font-size:11px; cursor:pointer; transition:all .15s }
@@ -667,7 +667,7 @@ onUnmounted(() => {
 .send { width:38px; height:38px; background:var(--primary-bg); border:none; border-radius:8px; color:var(--primary-light); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; flex-shrink:0 }
 .send:hover:not(:disabled) { background:var(--primary-bg-hover) }
 .send:disabled { opacity:.3; cursor:not-allowed }
-.cancel-btn { width:38px; height:38px; background:var(--danger-bg, rgba(245, 101, 101, 0.15)); border:1px solid var(--border-danger, rgba(245, 101, 101, 0.3)); border-radius:8px; color:var(--accent-danger); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; flex-shrink:0 }
+.cancel-btn { width:38px; height:38px; background:var(--danger-bg); border:1px solid var(--border-danger); border-radius:8px; color:var(--accent-danger); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; flex-shrink:0 }
 .cancel-btn:hover { background:var(--danger-bg) }
 .in-hint { margin-top:5px; padding:0 2px }
 .hw { color:var(--accent-danger); font-size:11px }
@@ -710,7 +710,7 @@ onUnmounted(() => {
 .cfg-save:disabled { opacity:.4; cursor:not-allowed }
 
 /* 图标颜色 */
-.icon-warning { color: var(--warning-light, #ed8936); }
-.icon-success { color: var(--accent-success, #48bb78); }
-.icon-purple { color: var(--accent-purple, #9f7aea); }
+.icon-warning { color: var(--warning-light); }
+.icon-success { color: var(--accent-success); }
+.icon-purple { color: var(--accent-purple); }
 </style>

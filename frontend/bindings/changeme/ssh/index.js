@@ -21,6 +21,7 @@ export {
 
 export {
     AIConfig,
+    AdvancedConfig,
     AppConfig,
     CPUStats,
     CloudConfig,
@@ -44,6 +45,7 @@ export {
     SSHConfig,
     SSHGroup,
     SSHSettings,
+    ShortcutsConfig,
     SystemStats,
     TerminalConfig,
     UIConfig,

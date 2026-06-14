@@ -111,6 +111,72 @@ tasks:
       - task: create:rpm
       - task: create:aur
 
+  build:portable:
+    summary: Builds portable binaries for both amd64 and arm64
+    cmds:
+      - task: build:portable:arch
+        vars:
+          ARCH: amd64
+          DEV: '{{.DEV}}'
+      - task: build:portable:arch
+        vars:
+          ARCH: arm64
+          DEV: '{{.DEV}}'
+
+  build:portable:arch:
+    summary: Builds a single architecture portable archive
+    internal: true
+    cmds:
+      - task: build
+        vars:
+          ARCH: '{{.ARCH}}'
+          DEV: '{{.DEV}}'
+      - task: generate:dotdesktop
+      - |
+        cd "{{.BIN_DIR}}"
+        PORTABLE_DIR="{{.APP_NAME}}-linux-{{.ARCH}}"
+        mkdir -p "$PORTABLE_DIR"
+        cp "{{.APP_NAME}}" "$PORTABLE_DIR/"
+        chmod +x "$PORTABLE_DIR/{{.APP_NAME}}"
+        # Include .desktop file
+        cp "{{.ROOT_DIR}}/build/linux/{{.APP_NAME}}.desktop" "$PORTABLE_DIR/" 2>/dev/null || true
+        # Include icon
+        if [ -f "{{.ROOT_DIR}}/build/appicon.png" ]; then
+          cp "{{.ROOT_DIR}}/build/appicon.png" "$PORTABLE_DIR/{{.APP_NAME}}.png"
+        fi
+        # Include README if exists
+        if [ -f "{{.ROOT_DIR}}/README.md" ]; then
+          cp "{{.ROOT_DIR}}/README.md" "$PORTABLE_DIR/"
+        fi
+        # Create a simple install script
+        cat > "$PORTABLE_DIR/install.sh" << 'INSTALL_EOF'
+        #!/bin/bash
+        SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+        INSTALL_DIR="${HOME}/.local/bin"
+        DESKTOP_DIR="${HOME}/.local/share/applications"
+        ICON_DIR="${HOME}/.local/share/icons"
+        mkdir -p "$INSTALL_DIR" "$DESKTOP_DIR" "$ICON_DIR"
+        cp "$SCRIPT_DIR/{{.APP_NAME}}" "$INSTALL_DIR/"
+        chmod +x "$INSTALL_DIR/{{.APP_NAME}}"
+        [ -f "$SCRIPT_DIR/{{.APP_NAME}}.png" ] && cp "$SCRIPT_DIR/{{.APP_NAME}}.png" "$ICON_DIR/"
+        if [ -f "$SCRIPT_DIR/{{.APP_NAME}}.desktop" ]; then
+          sed "s|Exec=.*|Exec=$INSTALL_DIR/{{.APP_NAME}}|g; s|Icon=.*|Icon=$ICON_DIR/{{.APP_NAME}}|g" \
+            "$SCRIPT_DIR/{{.APP_NAME}}.desktop" > "$DESKTOP_DIR/{{.APP_NAME}}.desktop"
+        fi
+        echo "Installed to $INSTALL_DIR/{{.APP_NAME}}"
+        echo "Make sure $INSTALL_DIR is in your PATH"
+        INSTALL_EOF
+        chmod +x "$PORTABLE_DIR/install.sh"
+        # Create tar.gz
+        tar czf "${PORTABLE_DIR}.tar.gz" "$PORTABLE_DIR"
+        rm -rf "$PORTABLE_DIR"
+        echo "Created: bin/${PORTABLE_DIR}.tar.gz"
+
+  package:portable:
+    summary: Builds and packages portable archives (amd64 + arm64)
+    cmds:
+      - task: build:portable
+
   create:appimage:
     summary: Creates an AppImage
     dir: build/linux/appimage

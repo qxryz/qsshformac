@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { SSHService } from "../../../bindings/changeme/ssh"
+import { SSHService, SSHConfig } from "../../../bindings/changeme/ssh"
 import { useSSHConnectionsStore } from '../../stores/sshConnections'
 import { useConfigStore } from '../../stores/config'
 import { Events, Dialogs } from '@wailsio/runtime'
@@ -91,15 +91,14 @@ const testConnection = async () => {
 
   loading.value = true
   try {
-    // 直接传递配置对象给后端
-    await SSHService.TestConnection({
+    await SSHService.TestConnection(new SSHConfig({
       host: formData.host,
       port: formData.port,
       username: formData.username,
       password: formData.authType === 'password' ? formData.password : undefined,
       privateKey: formData.authType === 'key' ? formData.privateKey : undefined,
       timeout: formData.timeout
-    })
+    }))
 
     messageRef.value?.success('连接测试成功！')
   } catch (error: any) {
@@ -112,7 +111,7 @@ const testConnection = async () => {
 // 立即连接
 const saveAndConnect = async () => {
   console.log('[NewConnection] ========== 开始连接流程 ==========')
-  
+
   if (!validateForm()) {
     console.log('[NewConnection] ❌ 表单验证失败')
     return
@@ -120,7 +119,7 @@ const saveAndConnect = async () => {
 
   // 检查是否已经有SSH窗口打开
   const hasExistingWindow = await checkExistingSSHWindow()
-  
+
   // 先保存配置
   pendingConfig.value = {
     name: formData.name || `${formData.username}@${formData.host}`,
@@ -131,15 +130,39 @@ const saveAndConnect = async () => {
     privateKey: formData.authType === 'key' ? formData.privateKey : undefined,
     timeout: formData.timeout
   }
-  
+
   if (!hasExistingWindow) {
     // 第一个连接，直接使用默认分组，不显示对话框
     console.log('[NewConnection] 🎯 第一个连接，直接使用默认分组')
     await handleDialogSelect('default-group')
   } else {
-    // 已有窗口，显示选择对话框
-    console.log('[NewConnection] ✅ 已有窗口，显示选择对话框')
-    showDialog.value = true
+    // 已有窗口，根据配置决定行为
+    const configStore = useConfigStore()
+    await configStore.init()
+
+    // 诊断日志：打印完整配置
+    console.log('[NewConnection] 📋 完整配置对象:', JSON.stringify(configStore.config, null, 2))
+    console.log('[NewConnection] 📋 advanced 分组:', configStore.config?.advanced)
+
+    const groupBehavior = configStore.get('advanced', 'groupBehavior')
+    console.log('[NewConnection] 📋 原始 groupBehavior 值:', groupBehavior, '类型:', typeof groupBehavior)
+
+    const finalBehavior = groupBehavior || 'prompt'
+    console.log('[NewConnection] 📋 最终分组行为:', finalBehavior)
+
+    if (finalBehavior === 'join_default') {
+      // 自动加入默认分组
+      console.log('[NewConnection] 🎯 自动加入默认分组')
+      await handleDialogSelect('default-group')
+    } else if (finalBehavior === 'new_window') {
+      // 自动打开新窗口
+      console.log('[NewConnection] 🪟 自动打开新窗口')
+      await handleDialogSelect('new-window')
+    } else {
+      // 弹出选择对话框（默认行为）
+      console.log('[NewConnection] ✅ 显示选择对话框')
+      showDialog.value = true
+    }
   }
 }
 
@@ -152,7 +175,7 @@ const checkExistingSSHWindow = async (): Promise<boolean> => {
     
     // 检查是否有非空分组（除了默认分组）
     for (const group of groups) {
-      if (group.conn_ids && group.conn_ids.length > 0) {
+      if (group && group.conn_ids && group.conn_ids.length > 0) {
         console.log('[NewConnection] ✅ 发现已有连接的分组:', group.id)
         return true
       }
@@ -222,7 +245,7 @@ const handleDialogSelect = async (type: string) => {
     console.log('[NewConnection]    - groupName:', config.name)
     console.log('[NewConnection]    - activeConn:', result.connID)
     
-    await SSHService.OpenSSHWindow(result.groupID, config.name, result.connID)
+    await SSHService.OpenSSHWindow(result.groupID!, config.name!, result.connID!)
 
     console.log('[NewConnection] 🪟 窗口操作完成')
 

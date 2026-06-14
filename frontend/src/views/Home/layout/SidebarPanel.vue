@@ -386,7 +386,7 @@ const quickConnect = async (conn) => {
   try {
     const groups = await GetAllGroups()
     for (const group of groups) {
-      if (group.conn_ids && group.conn_ids.length > 0) {
+      if (group && group.conn_ids && group.conn_ids.length > 0) {
         hasExistingWindow = true
         break
       }
@@ -397,8 +397,22 @@ const quickConnect = async (conn) => {
     // 没有窗口，直接用默认分组连接
     await executeQuickConnect('default-group')
   } else {
-    // 已有窗口，弹出选择对话框
-    showConnDialog.value = true
+    // 已有窗口，根据配置决定行为
+    const cfgStore = useConfigStore()
+    await cfgStore.init()
+    const groupBehavior = cfgStore.get('advanced', 'groupBehavior') || 'prompt'
+    console.log('[SidebarPanel] 📋 分组行为配置:', groupBehavior)
+
+    if (groupBehavior === 'join_default') {
+      console.log('[SidebarPanel] 🎯 自动加入默认分组')
+      await executeQuickConnect('default-group')
+    } else if (groupBehavior === 'new_window') {
+      console.log('[SidebarPanel] 🪟 自动打开新窗口')
+      await executeQuickConnect('new-window')
+    } else {
+      console.log('[SidebarPanel] ✅ 显示选择对话框')
+      showConnDialog.value = true
+    }
   }
 }
 
@@ -433,7 +447,7 @@ const executeQuickConnect = async (type) => {
     messageRef.value?.success(`已连接 ${config.name}`)
 
     // 打开 SSH 窗口
-    await OpenSSHWindow(result.groupID, config.name, result.connID)
+    await OpenSSHWindow(result.groupID || '', config.name || '', result.connID || '')
 
     // 如果开启了自动托盘，连接成功后隐藏主窗口
     const cfgStore = useConfigStore()
@@ -537,10 +551,19 @@ const handleClickOutside = (event) => {
 // 监听后端广播的连接状态更新
 const handleConnectionsUpdated = (event) => {
   const { connections, timestamp } = event.data || {}
-  
+  console.log('[SidebarPanel] 📡 收到 ssh:connections-updated 事件:', {
+    timestamp,
+    connectionsCount: connections?.length,
+    hasConnections: !!connections,
+    isArray: Array.isArray(connections)
+  })
+
   if (connections && Array.isArray(connections)) {
     // 直接更新 store 中的数据（store内部会检测变化）
+    console.log('[SidebarPanel] 📤 调用 updateConnections，连接数:', connections.length)
     connectionsStore.updateConnections(connections)
+  } else {
+    console.log('[SidebarPanel] ⚠️ 事件数据无效，跳过更新')
   }
 }
 

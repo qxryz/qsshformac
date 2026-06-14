@@ -12,9 +12,25 @@ import (
 
 // AppConfig 应用配置（仅保留实际使用的字段）
 type AppConfig struct {
-	Terminal TerminalConfig `json:"terminal"`
-	UI       UIConfig       `json:"ui"`
-	Cloud    CloudConfig    `json:"cloud"`
+	Terminal  TerminalConfig  `json:"terminal"`
+	UI        UIConfig        `json:"ui"`
+	Cloud     CloudConfig     `json:"cloud"`
+	Shortcuts ShortcutsConfig `json:"shortcuts"`
+	Advanced  AdvancedConfig  `json:"advanced"`
+}
+
+// ShortcutsConfig 快捷键配置
+type ShortcutsConfig struct {
+	Enabled       bool `json:"enabled"`       // 全局快捷键开关
+	SwitchTab     bool `json:"switchTab"`     // Ctrl+←/→ 切换标签
+	SaveGroup     bool `json:"saveGroup"`     // Ctrl+Shift+S 保存当前连接
+	CloudUpload   bool `json:"cloudUpload"`   // Ctrl+Shift+U 上传到云端
+	CloudDownload bool `json:"cloudDownload"` // Ctrl+Shift+D 从云端下载
+}
+
+// AdvancedConfig 高级配置
+type AdvancedConfig struct {
+	GroupBehavior string `json:"groupBehavior"` // join_default | new_window | prompt
 }
 
 // CloudConfig 云端配置
@@ -124,6 +140,16 @@ func getDefaultConfig() *AppConfig {
 			ServerURL:    "",
 			Token:        "",
 			SyncInterval: 60,
+		},
+		Shortcuts: ShortcutsConfig{
+			Enabled:       true,
+			SwitchTab:     true,
+			SaveGroup:     true,
+			CloudUpload:   true,
+			CloudDownload: true,
+		},
+		Advanced: AdvancedConfig{
+			GroupBehavior: "prompt",
 		},
 	}
 }
@@ -274,6 +300,32 @@ func mergeConfig(raw map[string]interface{}, defaults *AppConfig) *AppConfig {
 		}
 	}
 
+	// 合并 shortcuts 配置
+	if scRaw, ok := raw["shortcuts"].(map[string]interface{}); ok {
+		if v, ok := scRaw["enabled"].(bool); ok {
+			result.Shortcuts.Enabled = v
+		}
+		if v, ok := scRaw["switchTab"].(bool); ok {
+			result.Shortcuts.SwitchTab = v
+		}
+		if v, ok := scRaw["saveGroup"].(bool); ok {
+			result.Shortcuts.SaveGroup = v
+		}
+		if v, ok := scRaw["cloudUpload"].(bool); ok {
+			result.Shortcuts.CloudUpload = v
+		}
+		if v, ok := scRaw["cloudDownload"].(bool); ok {
+			result.Shortcuts.CloudDownload = v
+		}
+	}
+
+	// 合并 advanced 配置
+	if advRaw, ok := raw["advanced"].(map[string]interface{}); ok {
+		if v, ok := advRaw["groupBehavior"].(string); ok && v != "" {
+			result.Advanced.GroupBehavior = v
+		}
+	}
+
 	return &result
 }
 
@@ -415,6 +467,21 @@ func (s *ConfigService) Get(category, key string) (interface{}, error) {
 		if key == "autoSyncFrom" { return s.config.Cloud.AutoSyncFrom, nil }
 	}
 
+	if category == "shortcuts" {
+		if key == "enabled" {
+			fmt.Printf("[ConfigService] Get shortcuts.enabled = %v\n", s.config.Shortcuts.Enabled)
+			return s.config.Shortcuts.Enabled, nil
+		}
+		if key == "switchTab" { return s.config.Shortcuts.SwitchTab, nil }
+		if key == "saveGroup" { return s.config.Shortcuts.SaveGroup, nil }
+		if key == "cloudUpload" { return s.config.Shortcuts.CloudUpload, nil }
+		if key == "cloudDownload" { return s.config.Shortcuts.CloudDownload, nil }
+	}
+
+	if category == "advanced" {
+		if key == "groupBehavior" { return s.config.Advanced.GroupBehavior, nil }
+	}
+
 	return nil, fmt.Errorf("未知的配置项: %s.%s", category, key)
 }
 
@@ -496,6 +563,40 @@ func (s *ConfigService) Set(category, key string, value interface{}) error {
 		}
 	}
 
+	if category == "shortcuts" {
+		if key == "enabled" {
+			if v, ok := value.(bool); ok {
+				fmt.Printf("[ConfigService] Set shortcuts.enabled = %v\n", v)
+				s.config.Shortcuts.Enabled = v
+				return s.save()
+			}
+			return fmt.Errorf("无效的值类型")
+		}
+		if key == "switchTab" {
+			if v, ok := value.(bool); ok { s.config.Shortcuts.SwitchTab = v; return s.save() }
+			return fmt.Errorf("无效的值类型")
+		}
+		if key == "saveGroup" {
+			if v, ok := value.(bool); ok { s.config.Shortcuts.SaveGroup = v; return s.save() }
+			return fmt.Errorf("无效的值类型")
+		}
+		if key == "cloudUpload" {
+			if v, ok := value.(bool); ok { s.config.Shortcuts.CloudUpload = v; return s.save() }
+			return fmt.Errorf("无效的值类型")
+		}
+		if key == "cloudDownload" {
+			if v, ok := value.(bool); ok { s.config.Shortcuts.CloudDownload = v; return s.save() }
+			return fmt.Errorf("无效的值类型")
+		}
+	}
+
+	if category == "advanced" {
+		if key == "groupBehavior" {
+			if v, ok := value.(string); ok { s.config.Advanced.GroupBehavior = v; return s.save() }
+			return fmt.Errorf("无效的值类型")
+		}
+	}
+
 	return fmt.Errorf("未知的配置项: %s.%s", category, key)
 }
 
@@ -512,6 +613,10 @@ func (s *ConfigService) ResetCategory(category string) error {
 	}
 	if category == "ui" {
 		s.config.UI = defaults.UI
+		return s.save()
+	}
+	if category == "shortcuts" {
+		s.config.Shortcuts = defaults.Shortcuts
 		return s.save()
 	}
 

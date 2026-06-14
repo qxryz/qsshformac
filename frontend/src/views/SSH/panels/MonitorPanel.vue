@@ -656,7 +656,7 @@ onUnmounted(() => {
 }
 
 .stat-card {
-  background: var(--surface-2, rgba(45, 45, 45, 0.6));
+  background: var(--card-bg);
   border-radius: 0.5rem;
   padding: 1rem;
   border: 1px solid var(--border-default);
@@ -673,17 +673,17 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-.icon-cpu { color: var(--primary-light, #63b3ed); }
-.icon-memory { color: var(--accent-success, #48bb78); }
-.icon-disk { color: var(--accent-warning, #ecc94b); }
-.icon-network { color: var(--warning-light, #f6ad55); }
+.icon-cpu { color: var(--primary-light); }
+.icon-memory { color: var(--accent-success); }
+.icon-disk { color: var(--accent-warning); }
+.icon-network { color: var(--warning-light); }
 
-.chart-line-primary { stroke: var(--primary-light, #63b3ed); }
-.chart-line-success { stroke: var(--accent-success, #48bb78); }
-.chart-line-warning { stroke: var(--warning-light, #f6ad55); }
+.chart-line-primary { stroke: var(--primary-light); }
+.chart-line-success { stroke: var(--accent-success); }
+.chart-line-warning { stroke: var(--warning-light); }
 
 .card-title {
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 0.875rem;
 }
@@ -718,7 +718,7 @@ onUnmounted(() => {
 .usage-text {
   position: relative;
   z-index: 1;
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 700;
 }
@@ -727,7 +727,7 @@ onUnmounted(() => {
 .usage-bar {
   width: 100%;
   height: 8px;
-  background: var(--surface-3, rgba(45, 45, 45, 0.8));
+  background: var(--surface-3);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -738,16 +738,16 @@ onUnmounted(() => {
 
 .usage-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-success, #48bb78), var(--success-light, #68d391));
+  background: linear-gradient(90deg, var(--accent-success), var(--success-light));
   transition: width 0.3s ease;
 }
 
 .usage-high .usage-fill {
-  background: linear-gradient(90deg, var(--danger-light, #f56565), var(--accent-danger, #fc8181));
+  background: linear-gradient(90deg, var(--danger-light), var(--accent-danger));
 }
 
 .usage-medium .usage-fill {
-  background: linear-gradient(90deg, var(--accent-warning, #ecc94b), var(--warning-light, #f6e05e));
+  background: linear-gradient(90deg, var(--accent-warning), var(--warning-light));
 }
 
 /* 卡片详情 */
@@ -764,16 +764,16 @@ onUnmounted(() => {
 }
 
 .detail-item .label {
-  color: var(--text-secondary, #a0aec0);
+  color: var(--text-secondary);
 }
 
 .detail-item .value {
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .uptime-value {
-  color: var(--primary-light, #63b3ed);
+  color: var(--primary-light);
   font-weight: 600;
 }
 
@@ -798,20 +798,20 @@ onUnmounted(() => {
 }
 
 .disk-name {
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-size: 0.75rem;
   font-family: monospace;
 }
 
 .disk-size {
-  color: var(--text-secondary, #a0aec0);
+  color: var(--text-secondary);
   font-size: 0.625rem;
 }
 
 .disk-percent {
   flex: 0 0 40px;
   text-align: right;
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -830,11 +830,11 @@ onUnmounted(() => {
 }
 
 .net-label {
-  color: var(--text-secondary, #a0aec0);
+  color: var(--text-secondary);
 }
 
 .net-value {
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-weight: 500;
   font-family: monospace;
 }
@@ -858,7 +858,7 @@ onUnmounted(() => {
   top: 0.25rem;
   right: 0.25rem;
   font-size: 0.6875rem;
-  color: var(--primary-light, #63b3ed);
+  color: var(--primary-light);
   font-weight: 600;
   font-family: monospace;
 }
@@ -878,11 +878,11 @@ onUnmounted(() => {
 }
 
 .rate-item.rx {
-  color: var(--accent-success, #48bb78);
+  color: var(--accent-success);
 }
 
 .rate-item.tx {
-  color: var(--warning-light, #f6ad55);
+  color: var(--warning-light);
 }
 
 /* 进程区域 */
@@ -903,24 +903,24 @@ onUnmounted(() => {
 
 .section-header h3 {
   margin: 0;
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-size: 0.875rem;
   font-weight: 600;
 }
 
 .refresh-btn {
   padding: 0.375rem 0.75rem;
-  background: var(--primary-bg, rgba(66, 153, 225, 0.2));
-  border: 1px solid var(--border-accent, rgba(66, 153, 225, 0.5));
+  background: var(--primary-bg);
+  border: 1px solid var(--border-accent);
   border-radius: 0.25rem;
-  color: var(--primary-light, #63b3ed);
+  color: var(--primary-light);
   cursor: pointer;
   font-size: 0.75rem;
   transition: all 0.2s;
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: var(--primary-bg-hover, rgba(66, 153, 225, 0.3));
+  background: var(--primary-bg-hover);
 }
 
 .refresh-btn:disabled {
@@ -943,14 +943,14 @@ onUnmounted(() => {
 .process-table thead {
   position: sticky;
   top: 0;
-  background: var(--bg-toolbar);
+  background: var(--toolbar-3);
   z-index: 1;
 }
 
 .process-table th {
   padding: 0.625rem 0.75rem;
   text-align: left;
-  color: var(--text-secondary, #a0aec0);
+  color: var(--text-secondary);
   font-weight: 600;
   border-bottom: 2px solid var(--surface-hover);
   white-space: nowrap;
@@ -962,22 +962,22 @@ onUnmounted(() => {
 }
 
 .process-table th.sortable:hover {
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
 }
 
 .sort-indicator {
   margin-left: 0.25rem;
-  color: var(--primary-light, #63b3ed);
+  color: var(--primary-light);
 }
 
 .process-table td {
   padding: 0.5rem 0.75rem;
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   border-bottom: 1px solid var(--surface-1);
 }
 
 .process-row:hover {
-  background: var(--bg-hover, rgba(66, 153, 225, 0.1));
+  background: var(--bg-hover);
 }
 
 .process-name {
@@ -990,33 +990,33 @@ onUnmounted(() => {
 
 /* 使用率颜色 */
 .usage-low {
-  color: var(--success-light, #68d391);
+  color: var(--success-light);
 }
 
 .usage-medium {
-  color: var(--accent-warning, #f6e05e);
+  color: var(--accent-warning);
 }
 
 .usage-high {
-  color: var(--accent-danger, #fc8181);
+  color: var(--accent-danger);
   font-weight: 600;
 }
 
 /* 终止进程按钮 */
 .kill-btn {
   padding: 0.25rem 0.5rem;
-  background: var(--danger-bg, rgba(245, 101, 101, 0.2));
-  border: 1px solid var(--border-danger, rgba(245, 101, 101, 0.5));
+  background: var(--danger-bg);
+  border: 1px solid var(--border-danger);
   border-radius: 0.25rem;
-  color: var(--accent-danger, #fc8181);
+  color: var(--accent-danger);
   cursor: pointer;
   font-size: 0.6875rem;
   transition: all 0.2s;
 }
 
 .kill-btn:hover {
-  background: var(--danger-bg, rgba(245, 101, 101, 0.3));
-  border-color: var(--border-danger, rgba(245, 101, 101, 0.7));
+  background: var(--danger-bg);
+  border-color: var(--border-danger);
 }
 
 /* 操作按钮组 */
@@ -1027,27 +1027,27 @@ onUnmounted(() => {
 
 .signal-btn {
   padding: 0.25rem 0.5rem;
-  background: var(--primary-bg, rgba(99, 179, 237, 0.2));
-  border: 1px solid var(--border-accent, rgba(99, 179, 237, 0.5));
+  background: var(--primary-bg);
+  border: 1px solid var(--border-accent);
   border-radius: 0.25rem;
-  color: var(--primary-light, #63b3ed);
+  color: var(--primary-light);
   cursor: pointer;
   font-size: 0.6875rem;
   transition: all 0.2s;
 }
 
 .signal-btn:hover {
-  background: var(--primary-bg-hover, rgba(99, 179, 237, 0.3));
-  border-color: var(--border-accent, rgba(99, 179, 237, 0.7));
+  background: var(--primary-bg-hover);
+  border-color: var(--border-accent);
 }
 
 /* 信号下拉菜单 */
 .signal-dropdown {
   position: fixed;
-  background: var(--bg-tooltip, rgba(45, 45, 45, 0.98));
+  background: var(--bg-tooltip);
   border: 1px solid var(--border-strong);
   border-radius: 0.5rem;
-  box-shadow: var(--shadow-lg, 0 10px 30px rgba(0, 0, 0, 0.5));
+  box-shadow: var(--shadow-lg);
   padding: 0.5rem;
   min-width: 200px;
   z-index: 10000;
@@ -1067,7 +1067,7 @@ onUnmounted(() => {
 
 .dropdown-header {
   padding: 0.5rem;
-  color: var(--text-secondary, #a0aec0);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   border-bottom: 1px solid var(--surface-hover);
   margin-bottom: 0.375rem;
@@ -1080,7 +1080,7 @@ onUnmounted(() => {
   background: transparent;
   border: none;
   border-radius: 0.25rem;
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 0.8125rem;
   text-align: left;
@@ -1088,15 +1088,15 @@ onUnmounted(() => {
 }
 
 .dropdown-item:hover {
-  background: var(--primary-bg, rgba(66, 153, 225, 0.2));
+  background: var(--primary-bg);
 }
 
 .dropdown-item.danger {
-  color: var(--accent-danger, #fc8181);
+  color: var(--accent-danger);
 }
 
 .dropdown-item.danger:hover {
-  background: var(--danger-bg, rgba(245, 101, 101, 0.2));
+  background: var(--danger-bg);
 }
 
 /* 滚动条 */
@@ -1114,7 +1114,7 @@ onUnmounted(() => {
 }
 
 .process-table-container::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover, rgba(255, 255, 255, 0.3));
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* === 响应式布局 === */

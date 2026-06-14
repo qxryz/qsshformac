@@ -56,6 +56,38 @@ export class AIConfig {
 }
 
 /**
+ * AdvancedConfig 高级配置
+ */
+export class AdvancedConfig {
+    /**
+     * Creates a new AdvancedConfig instance.
+     * @param {Partial<AdvancedConfig>} [$$source = {}] - The source object to create the AdvancedConfig.
+     */
+    constructor($$source = {}) {
+        if (!("groupBehavior" in $$source)) {
+            /**
+             * join_default | new_window | prompt
+             * @member
+             * @type {string}
+             */
+            this["groupBehavior"] = "";
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new AdvancedConfig instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {AdvancedConfig}
+     */
+    static createFrom($$source = {}) {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new AdvancedConfig(/** @type {Partial<AdvancedConfig>} */($$parsedSource));
+    }
+}
+
+/**
  * AppConfig 应用配置（仅保留实际使用的字段）
  */
 export class AppConfig {
@@ -85,6 +117,20 @@ export class AppConfig {
              */
             this["cloud"] = (new CloudConfig());
         }
+        if (!("shortcuts" in $$source)) {
+            /**
+             * @member
+             * @type {ShortcutsConfig}
+             */
+            this["shortcuts"] = (new ShortcutsConfig());
+        }
+        if (!("advanced" in $$source)) {
+            /**
+             * @member
+             * @type {AdvancedConfig}
+             */
+            this["advanced"] = (new AdvancedConfig());
+        }
 
         Object.assign(this, $$source);
     }
@@ -98,6 +144,8 @@ export class AppConfig {
         const $$createField0_0 = $$createType0;
         const $$createField1_0 = $$createType1;
         const $$createField2_0 = $$createType2;
+        const $$createField3_0 = $$createType3;
+        const $$createField4_0 = $$createType4;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("terminal" in $$parsedSource) {
             $$parsedSource["terminal"] = $$createField0_0($$parsedSource["terminal"]);
@@ -107,6 +155,12 @@ export class AppConfig {
         }
         if ("cloud" in $$parsedSource) {
             $$parsedSource["cloud"] = $$createField2_0($$parsedSource["cloud"]);
+        }
+        if ("shortcuts" in $$parsedSource) {
+            $$parsedSource["shortcuts"] = $$createField3_0($$parsedSource["shortcuts"]);
+        }
+        if ("advanced" in $$parsedSource) {
+            $$parsedSource["advanced"] = $$createField4_0($$parsedSource["advanced"]);
         }
         return new AppConfig(/** @type {Partial<AppConfig>} */($$parsedSource));
     }
@@ -163,8 +217,8 @@ export class CPUStats {
      * @returns {CPUStats}
      */
     static createFrom($$source = {}) {
-        const $$createField2_0 = $$createType3;
-        const $$createField3_0 = $$createType4;
+        const $$createField2_0 = $$createType5;
+        const $$createField3_0 = $$createType6;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("perCpuUsage" in $$parsedSource) {
             $$parsedSource["perCpuUsage"] = $$createField2_0($$parsedSource["perCpuUsage"]);
@@ -569,8 +623,8 @@ export class DiskStats {
      * @returns {DiskStats}
      */
     static createFrom($$source = {}) {
-        const $$createField0_0 = $$createType6;
-        const $$createField1_0 = $$createType7;
+        const $$createField0_0 = $$createType8;
+        const $$createField1_0 = $$createType9;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("partitions" in $$parsedSource) {
             $$parsedSource["partitions"] = $$createField0_0($$parsedSource["partitions"]);
@@ -772,8 +826,8 @@ export class FirewallInfo {
      * @returns {FirewallInfo}
      */
     static createFrom($$source = {}) {
-        const $$createField2_0 = $$createType9;
-        const $$createField4_0 = $$createType10;
+        const $$createField2_0 = $$createType11;
+        const $$createField4_0 = $$createType12;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("rules" in $$parsedSource) {
             $$parsedSource["rules"] = $$createField2_0($$parsedSource["rules"]);
@@ -1211,7 +1265,7 @@ export class NetworkStats {
      * @returns {NetworkStats}
      */
     static createFrom($$source = {}) {
-        const $$createField0_0 = $$createType12;
+        const $$createField0_0 = $$createType14;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("interfaces" in $$parsedSource) {
             $$parsedSource["interfaces"] = $$createField0_0($$parsedSource["interfaces"]);
@@ -1637,7 +1691,7 @@ export class SSHGroup {
      * @returns {SSHGroup}
      */
     static createFrom($$source = {}) {
-        const $$createField2_0 = $$createType10;
+        const $$createField2_0 = $$createType12;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("conn_ids" in $$parsedSource) {
             $$parsedSource["conn_ids"] = $$createField2_0($$parsedSource["conn_ids"]);
@@ -1713,6 +1767,70 @@ export class SSHSettings {
 }
 
 /**
+ * ShortcutsConfig 快捷键配置
+ */
+export class ShortcutsConfig {
+    /**
+     * Creates a new ShortcutsConfig instance.
+     * @param {Partial<ShortcutsConfig>} [$$source = {}] - The source object to create the ShortcutsConfig.
+     */
+    constructor($$source = {}) {
+        if (!("enabled" in $$source)) {
+            /**
+             * 全局快捷键开关
+             * @member
+             * @type {boolean}
+             */
+            this["enabled"] = false;
+        }
+        if (!("switchTab" in $$source)) {
+            /**
+             * Ctrl+←/→ 切换标签
+             * @member
+             * @type {boolean}
+             */
+            this["switchTab"] = false;
+        }
+        if (!("saveGroup" in $$source)) {
+            /**
+             * Ctrl+Shift+S 保存当前连接
+             * @member
+             * @type {boolean}
+             */
+            this["saveGroup"] = false;
+        }
+        if (!("cloudUpload" in $$source)) {
+            /**
+             * Ctrl+Shift+U 上传到云端
+             * @member
+             * @type {boolean}
+             */
+            this["cloudUpload"] = false;
+        }
+        if (!("cloudDownload" in $$source)) {
+            /**
+             * Ctrl+Shift+D 从云端下载
+             * @member
+             * @type {boolean}
+             */
+            this["cloudDownload"] = false;
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new ShortcutsConfig instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {ShortcutsConfig}
+     */
+    static createFrom($$source = {}) {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new ShortcutsConfig(/** @type {Partial<ShortcutsConfig>} */($$parsedSource));
+    }
+}
+
+/**
  * SystemStats 系统整体统计
  */
 export class SystemStats {
@@ -1774,10 +1892,10 @@ export class SystemStats {
      * @returns {SystemStats}
      */
     static createFrom($$source = {}) {
-        const $$createField2_0 = $$createType13;
-        const $$createField3_0 = $$createType14;
-        const $$createField4_0 = $$createType15;
-        const $$createField5_0 = $$createType16;
+        const $$createField2_0 = $$createType15;
+        const $$createField3_0 = $$createType16;
+        const $$createField4_0 = $$createType17;
+        const $$createField5_0 = $$createType18;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("cpu" in $$parsedSource) {
             $$parsedSource["cpu"] = $$createField2_0($$parsedSource["cpu"]);
@@ -1951,17 +2069,19 @@ export class WindowManager {
 const $$createType0 = TerminalConfig.createFrom;
 const $$createType1 = UIConfig.createFrom;
 const $$createType2 = CloudConfig.createFrom;
-const $$createType3 = $Create.Array($Create.Any);
-const $$createType4 = LoadAvg.createFrom;
-const $$createType5 = DiskPartition.createFrom;
-const $$createType6 = $Create.Array($$createType5);
-const $$createType7 = DiskIOStats.createFrom;
-const $$createType8 = FirewallRule.createFrom;
-const $$createType9 = $Create.Array($$createType8);
-const $$createType10 = $Create.Array($Create.Any);
-const $$createType11 = NetInterface.createFrom;
-const $$createType12 = $Create.Array($$createType11);
-const $$createType13 = CPUStats.createFrom;
-const $$createType14 = MemoryStats.createFrom;
-const $$createType15 = DiskStats.createFrom;
-const $$createType16 = NetworkStats.createFrom;
+const $$createType3 = ShortcutsConfig.createFrom;
+const $$createType4 = AdvancedConfig.createFrom;
+const $$createType5 = $Create.Array($Create.Any);
+const $$createType6 = LoadAvg.createFrom;
+const $$createType7 = DiskPartition.createFrom;
+const $$createType8 = $Create.Array($$createType7);
+const $$createType9 = DiskIOStats.createFrom;
+const $$createType10 = FirewallRule.createFrom;
+const $$createType11 = $Create.Array($$createType10);
+const $$createType12 = $Create.Array($Create.Any);
+const $$createType13 = NetInterface.createFrom;
+const $$createType14 = $Create.Array($$createType13);
+const $$createType15 = CPUStats.createFrom;
+const $$createType16 = MemoryStats.createFrom;
+const $$createType17 = DiskStats.createFrom;
+const $$createType18 = NetworkStats.createFrom;

@@ -13,12 +13,33 @@ export const useConfigStore = defineStore('config', () => {
       defaultType: 'classic',
       autoSwitchClassic: true,
       switchMode: 'prompt', // prompt | auto | inline
-      fontSize: 14
+      fontSize: 14,
+      commandSendMode: 'enter',
+      codeHighlight: false
     },
     ui: {
       autoTray: false, // SSH 连接成功后自动最小化到托盘
       rememberPosition: true, // 记忆窗口位置
-      autoShowHome: true // SSH 窗口全部关闭后自动显示首页
+      autoShowHome: true, // SSH 窗口全部关闭后自动显示首页
+      theme: 'dark'
+    },
+    shortcuts: {
+      enabled: true, // 全局快捷键
+      switchTab: true,
+      saveGroup: true,
+      cloudUpload: true,
+      cloudDownload: true
+    },
+    advanced: {
+      groupBehavior: 'prompt' // join_default | new_window | prompt
+    },
+    cloud: {
+      enabled: false,
+      serverUrl: '',
+      token: '',
+      syncInterval: 60,
+      autoSyncTo: false,
+      autoSyncFrom: false
     }
   })
 

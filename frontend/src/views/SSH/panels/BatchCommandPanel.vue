@@ -256,7 +256,7 @@ onUnmounted(() => {
 .bc-toolbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 14px; border-bottom: 1px solid var(--border-default);
-  background: var(--bg-toolbar); flex-shrink: 0;
+  background: var(--toolbar-3); flex-shrink: 0;
 }
 .bc-toolbar-left { display: flex; align-items: center; gap: 8px; }
 .bc-toolbar-right { display: flex; gap: 6px; }
@@ -295,10 +295,10 @@ onUnmounted(() => {
 }
 
 .bc-conn-card {
-  background: var(--card-bg, #252525); border: 1px solid var(--border-subtle);
+  background: var(--card-bg); border: 1px solid var(--border-subtle);
   border-radius: 8px; padding: 10px; cursor: pointer; transition: all 0.15s;
 }
-.bc-conn-card:hover { background: var(--card-bg, #252525); border-color: var(--border-default); }
+.bc-conn-card:hover { background: var(--card-bg); border-color: var(--border-default); }
 .bc-conn-card.selected { border-color: var(--border-warning); background: var(--warning-bg); }
 .bc-conn-card.offline { opacity: 0.5; cursor: not-allowed; }
 
@@ -310,8 +310,8 @@ onUnmounted(() => {
 .bc-conn-badge {
   font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 600;
 }
-.bc-on { background: var(--success-bg, rgba(72,187,120,0.15)); color: var(--success-light); }
-.bc-off { background: var(--surface-2, rgba(160,174,192,0.1)); color: var(--text-muted); }
+.bc-on { background: var(--success-bg); color: var(--success-light); }
+.bc-off { background: var(--surface-2); color: var(--text-muted); }
 
 /* 终端选择 */
 .bc-term-select {
@@ -361,14 +361,14 @@ onUnmounted(() => {
 .bc-result-msg { color: var(--text-muted); font-size: 11px; flex: 1; }
 
 /* 图标颜色 */
-.icon-warning { color: var(--warning-light, #ed8936); }
-.icon-success { color: var(--success-light, #68d391); }
-.icon-danger { color: var(--accent-danger, #fc8181); }
+.icon-warning { color: var(--warning-light); }
+.icon-success { color: var(--success-light); }
+.icon-danger { color: var(--accent-danger); }
 
 /* 底部 */
 .bc-footer {
   display: flex; align-items: center; padding: 4px 14px;
-  border-top: 1px solid var(--border-default); background: var(--bg-toolbar);
+  border-top: 1px solid var(--border-default); background: var(--toolbar-3);
   font-size: 11px; color: var(--text-muted); flex-shrink: 0;
 }
 </style>

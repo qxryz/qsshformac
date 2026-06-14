@@ -110,6 +110,95 @@
       </div>
     </div>
 
+
+    <div class="config-section">
+      <div class="section-title">快捷键</div>
+      <div class="config-list">
+        <div class="config-item">
+          <div class="config-info">
+            <div class="config-label">启用全局快捷键</div>
+            <div class="config-desc">开启后可使用以下快捷键。</div>
+          </div>
+          <div class="config-control">
+            <label class="toggle">
+              <input type="checkbox" :checked="shortcutsEnabled" @change="handleShortcutsChange($event)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="config-item">
+          <div class="config-info">
+            <div class="config-label">Ctrl+← / Ctrl+→</div>
+            <div class="config-desc">快速切换 SSH 标签页。</div>
+          </div>
+          <div class="config-control">
+            <label class="toggle">
+              <input type="checkbox" :checked="shortcutSwitchTab" @change="handleShortcutSwitchTabChange($event)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="config-item">
+          <div class="config-info">
+            <div class="config-label">Ctrl+Shift+S</div>
+            <div class="config-desc">快速保存当前选中的连接。</div>
+          </div>
+          <div class="config-control">
+            <label class="toggle">
+              <input type="checkbox" :checked="shortcutSaveGroup" @change="handleShortcutSaveGroupChange($event)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="config-item">
+          <div class="config-info">
+            <div class="config-label">Ctrl+Shift+U</div>
+            <div class="config-desc">快速上传连接配置到云端。</div>
+          </div>
+          <div class="config-control">
+            <label class="toggle">
+              <input type="checkbox" :checked="shortcutCloudUpload" @change="handleShortcutCloudUploadChange($event)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="config-item">
+          <div class="config-info">
+            <div class="config-label">Ctrl+Shift+D</div>
+            <div class="config-desc">快速从云端下载连接配置。</div>
+          </div>
+          <div class="config-control">
+            <label class="toggle">
+              <input type="checkbox" :checked="shortcutCloudDownload" @change="handleShortcutCloudDownloadChange($event)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="config-section">
+      <div class="section-title">高级</div>
+      <div class="config-list">
+        <div class="config-item">
+          <div class="config-info">
+            <div class="config-label">多个连接时的分组行为</div>
+            <div class="config-desc">当有多个 SSH 连接时，新连接的处理方式。</div>
+          </div>
+          <div class="config-control">
+            <select
+              :value="groupBehavior"
+              @change="handleGroupBehaviorChange($event)"
+              class="select-input"
+            >
+              <option value="prompt">弹出选择</option>
+              <option value="join_default">加入默认分组</option>
+              <option value="new_window">打开新窗口</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="config-section">
       <div class="section-title">窗口</div>
 
@@ -396,6 +485,12 @@ const cloudToken = ref('')
 const cloudAutoSyncTo = ref(false)
 const cloudAutoSyncFrom = ref(false)
 const cloudStatusText = ref('未连接')
+const shortcutsEnabled = ref(true)
+const shortcutSwitchTab = ref(true)
+const shortcutSaveGroup = ref(true)
+const shortcutCloudUpload = ref(true)
+const shortcutCloudDownload = ref(true)
+const groupBehavior = ref('prompt')
 
 function goBack() {
   router.back()
@@ -412,6 +507,13 @@ onMounted(async () => {
   autoTray.value = configStore.get('ui', 'autoTray') || false
   rememberPosition.value = configStore.get('ui', 'rememberPosition') !== false
   autoShowHome.value = configStore.get('ui', 'autoShowHome') !== false
+  shortcutsEnabled.value = configStore.get('shortcuts', 'enabled') !== false
+  shortcutSwitchTab.value = configStore.get('shortcuts', 'switchTab') !== false
+  shortcutSaveGroup.value = configStore.get('shortcuts', 'saveGroup') !== false
+  shortcutCloudUpload.value = configStore.get('shortcuts', 'cloudUpload') !== false
+  shortcutCloudDownload.value = configStore.get('shortcuts', 'cloudDownload') !== false
+  groupBehavior.value = configStore.get('advanced', 'groupBehavior') || 'prompt'
+  console.log('[Settings] shortcutsEnabled:', shortcutsEnabled.value, 'groupBehavior:', groupBehavior.value)
 
   // 加载云端配置
   cloudEnabled.value = configStore.get('cloud', 'enabled') || false
@@ -479,6 +581,42 @@ async function handleCommandSendModeChange(e) {
 async function handleCodeHighlightChange(e) {
   codeHighlight.value = e.target.checked
   await configStore.set('terminal', 'codeHighlight', e.target.checked)
+  showToast('设置已保存')
+}
+
+async function handleShortcutsChange(e) {
+  shortcutsEnabled.value = e.target.checked
+  await configStore.set('shortcuts', 'enabled', e.target.checked)
+  showToast('设置已保存')
+}
+
+async function handleShortcutSwitchTabChange(e) {
+  shortcutSwitchTab.value = e.target.checked
+  await configStore.set('shortcuts', 'switchTab', e.target.checked)
+  showToast('设置已保存')
+}
+
+async function handleShortcutSaveGroupChange(e) {
+  shortcutSaveGroup.value = e.target.checked
+  await configStore.set('shortcuts', 'saveGroup', e.target.checked)
+  showToast('设置已保存')
+}
+
+async function handleShortcutCloudUploadChange(e) {
+  shortcutCloudUpload.value = e.target.checked
+  await configStore.set('shortcuts', 'cloudUpload', e.target.checked)
+  showToast('设置已保存')
+}
+
+async function handleShortcutCloudDownloadChange(e) {
+  shortcutCloudDownload.value = e.target.checked
+  await configStore.set('shortcuts', 'cloudDownload', e.target.checked)
+  showToast('设置已保存')
+}
+
+async function handleGroupBehaviorChange(e) {
+  groupBehavior.value = e.target.value
+  await configStore.set('advanced', 'groupBehavior', e.target.value)
   showToast('设置已保存')
 }
 

@@ -12,12 +12,12 @@ import (
 
 // CloudService 云端服务（Wails 暴露给前端）
 type CloudService struct {
-	mu       sync.RWMutex
-	app      *application.App
-	client   *client.CloudClient
-	config   *ConfigService
-	running  bool
-	stopCh   chan struct{}
+	mu      sync.RWMutex
+	app     *application.App
+	client  *client.CloudClient
+	config  *ConfigService
+	running bool
+	stopCh  chan struct{}
 }
 
 // NewCloudService 创建云端服务

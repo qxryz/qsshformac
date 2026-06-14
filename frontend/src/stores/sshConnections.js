@@ -84,6 +84,9 @@ export const useSSHConnectionsStore = defineStore('sshConnections', () => {
   let _updateTimer = null
   let _lastKey = ''
   const updateConnections = (newConnections) => {
+    const stack = new Error().stack?.split('\n').slice(1, 4).join(' <- ') || 'unknown'
+    console.log('[SSHConnections] 📥 updateConnections 被调用，来源:', stack)
+
     if (_updateTimer) clearTimeout(_updateTimer)
     _updateTimer = setTimeout(() => {
       _updateTimer = null
@@ -91,7 +94,17 @@ export const useSSHConnectionsStore = defineStore('sshConnections', () => {
       const newKey = newConnections.map(c =>
         `${c.id}:${c.status}:${c.name}:${c.host}:${c.port}:${c.saved}:${c.group_id}`
       ).join('|')
-      if (newKey === _lastKey) return
+
+      console.log('[SSHConnections] 🔍 指纹对比:', {
+        newKey: newKey.substring(0, 100) + '...',
+        lastKey: _lastKey.substring(0, 100) + '...',
+        isSame: newKey === _lastKey
+      })
+
+      if (newKey === _lastKey) {
+        console.log('[SSHConnections] ⏭️ 指纹相同，跳过更新')
+        return
+      }
       _lastKey = newKey
       console.log('[SSHConnections] 🔄 更新连接列表，新连接数:', newConnections.length)
       connections.value = newConnections

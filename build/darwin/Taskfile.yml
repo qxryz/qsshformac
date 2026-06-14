@@ -128,6 +128,53 @@ tasks:
     cmds:
       - task: create:app:bundle
 
+  build:portable:
+    summary: Builds portable .app bundles for both arm64 and amd64
+    cmds:
+      - task: build:portable:arch
+        vars:
+          ARCH: arm64
+          DEV: '{{.DEV}}'
+      - task: build:portable:arch
+        vars:
+          ARCH: amd64
+          DEV: '{{.DEV}}'
+
+  build:portable:arch:
+    summary: Builds a single architecture portable .app bundle
+    internal: true
+    cmds:
+      - task: build
+        vars:
+          ARCH: '{{.ARCH}}'
+          DEV: '{{.DEV}}'
+      - task: create:app:bundle
+      - |
+        cd "{{.BIN_DIR}}"
+        APP_DIR="{{.APP_NAME}}-darwin-{{.ARCH}}"
+        mkdir -p "$APP_DIR"
+        cp -R "{{.APP_NAME}}.app" "$APP_DIR/"
+        # Include README if exists
+        if [ -f "{{.ROOT_DIR}}/README.md" ]; then
+          cp "{{.ROOT_DIR}}/README.md" "$APP_DIR/"
+        fi
+        # Create zip
+        if command -v zip >/dev/null 2>&1; then
+          zip -r "${APP_DIR}.zip" "$APP_DIR"
+          rm -rf "$APP_DIR"
+          echo "Created: bin/${APP_DIR}.zip"
+        else
+          # Fallback to tar.gz
+          tar czf "${APP_DIR}.tar.gz" "$APP_DIR"
+          rm -rf "$APP_DIR"
+          echo "Created: bin/${APP_DIR}.tar.gz"
+        fi
+
+  package:portable:
+    summary: Builds and packages portable archives (arm64 + amd64)
+    cmds:
+      - task: build:portable
+
   package:universal:
     summary: Packages darwin universal binary (arm64 + amd64)
     deps:

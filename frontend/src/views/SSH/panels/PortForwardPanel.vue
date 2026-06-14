@@ -362,7 +362,7 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--surface-hover);
-  background: var(--card-bg, #252525);
+  background: var(--toolbar-3);
   flex-shrink: 0;
 }
 
@@ -373,15 +373,15 @@ onUnmounted(() => {
 }
 
 .pf-icon-accent {
-  color: var(--primary-light, #63b3ed);
+  color: var(--primary-light);
 }
 
 .pf-icon-muted {
-  color: var(--text-disabled, #4a5568);
+  color: var(--text-disabled);
 }
 
 .pf-title {
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 0.875rem;
 }
@@ -401,7 +401,7 @@ onUnmounted(() => {
   justify-content: center;
   height: 100%;
   gap: 0.75rem;
-  color: var(--text-muted, #718096);
+  color: var(--text-muted);
 }
 
 .pf-empty p {
@@ -423,7 +423,7 @@ onUnmounted(() => {
 .pf-table th {
   padding: 0.5rem 0.75rem;
   text-align: left;
-  color: var(--text-secondary, #a0aec0);
+  color: var(--text-secondary);
   font-weight: 600;
   border-bottom: 2px solid var(--surface-hover);
   white-space: nowrap;
@@ -431,7 +431,7 @@ onUnmounted(() => {
 
 .pf-table td {
   padding: 0.5rem 0.75rem;
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   border-bottom: 1px solid var(--surface-1);
   white-space: nowrap;
 }
@@ -442,11 +442,11 @@ onUnmounted(() => {
 }
 
 .pf-row-running td {
-  background: var(--success-bg, rgba(72, 187, 120, 0.03));
+  background: var(--success-bg);
 }
 
 .pf-row-error td {
-  background: var(--danger-bg, rgba(245, 101, 101, 0.03));
+  background: var(--danger-bg);
 }
 
 /* 连接和流量统计 */
@@ -456,16 +456,16 @@ onUnmounted(() => {
 }
 
 .pf-conn-count {
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .pf-conn-count.pf-conn-active {
-  color: var(--success-light, #68d391);
+  color: var(--success-light);
 }
 
 .pf-conn-total {
-  color: var(--text-disabled, #4a5568);
+  color: var(--text-disabled);
   font-size: 0.5625rem;
 }
 
@@ -474,15 +474,15 @@ onUnmounted(() => {
 }
 
 .pf-traffic-up {
-  color: var(--warning-light, #f6ad55);
+  color: var(--warning-light);
 }
 
 .pf-traffic-down {
-  color: var(--primary-light, #63b3ed);
+  color: var(--primary-light);
 }
 
 .pf-traffic-sep {
-  color: var(--text-disabled, #4a5568);
+  color: var(--text-disabled);
   margin: 0 0.125rem;
 }
 
@@ -496,13 +496,13 @@ onUnmounted(() => {
 }
 
 .pf-type-local {
-  background: var(--primary-bg, rgba(66, 153, 225, 0.2));
-  color: var(--primary-light, #63b3ed);
+  background: var(--primary-bg);
+  color: var(--primary-light);
 }
 
 .pf-type-remote {
-  background: var(--accent-purple-bg, rgba(159, 122, 234, 0.2));
-  color: var(--accent-purple, #b794f4);
+  background: var(--accent-purple-bg);
+  color: var(--accent-purple);
 }
 
 /* 状态 */
@@ -515,18 +515,18 @@ onUnmounted(() => {
 }
 
 .pf-status-running {
-  background: var(--success-bg, rgba(72, 187, 120, 0.2));
-  color: var(--success-light, #68d391);
+  background: var(--success-bg);
+  color: var(--success-light);
 }
 
 .pf-status-stopped {
-  background: var(--surface-2, rgba(160, 174, 192, 0.2));
-  color: var(--text-secondary, #a0aec0);
+  background: var(--surface-2);
+  color: var(--text-secondary);
 }
 
 .pf-status-error {
-  background: var(--danger-bg, rgba(245, 101, 101, 0.2));
-  color: var(--accent-danger, #fc8181);
+  background: var(--danger-bg);
+  color: var(--accent-danger);
 }
 
 /* 操作按钮 */
@@ -544,7 +544,7 @@ onUnmounted(() => {
   background: var(--border-subtle);
   border: 1px solid var(--border-strong);
   border-radius: 0.375rem;
-  color: var(--text-secondary, #a0aec0);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   cursor: pointer;
   transition: all 0.15s;
@@ -552,7 +552,7 @@ onUnmounted(() => {
 
 .pf-btn:hover {
   background: var(--surface-hover);
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
 }
 
 .pf-btn-sm {
@@ -560,43 +560,43 @@ onUnmounted(() => {
 }
 
 .pf-btn-primary {
-  background: var(--primary-bg, rgba(66, 153, 225, 0.2));
-  border-color: var(--border-accent, rgba(66, 153, 225, 0.4));
-  color: var(--primary-light, #63b3ed);
+  background: var(--primary-bg);
+  border-color: var(--border-accent);
+  color: var(--primary-light);
 }
 
 .pf-btn-primary:hover {
-  background: var(--primary-bg-hover, rgba(66, 153, 225, 0.35));
+  background: var(--primary-bg-hover);
 }
 
 .pf-btn-success {
-  background: var(--success-bg, rgba(72, 187, 120, 0.2));
-  border-color: var(--border-success, rgba(72, 187, 120, 0.4));
-  color: var(--success-light, #68d391);
+  background: var(--success-bg);
+  border-color: var(--border-success);
+  color: var(--success-light);
 }
 
 .pf-btn-success:hover {
-  background: var(--success-bg, rgba(72, 187, 120, 0.35));
+  background: var(--success-bg);
 }
 
 .pf-btn-warn {
-  background: var(--warning-bg, rgba(237, 137, 54, 0.2));
-  border-color: var(--border-warning, rgba(237, 137, 54, 0.4));
-  color: var(--warning-light, #f6ad55);
+  background: var(--warning-bg);
+  border-color: var(--border-warning);
+  color: var(--warning-light);
 }
 
 .pf-btn-warn:hover {
-  background: var(--warning-bg, rgba(237, 137, 54, 0.35));
+  background: var(--warning-bg);
 }
 
 .pf-btn-danger {
-  background: var(--danger-bg, rgba(245, 101, 101, 0.2));
-  border-color: var(--border-danger, rgba(245, 101, 101, 0.4));
-  color: var(--accent-danger, #fc8181);
+  background: var(--danger-bg);
+  border-color: var(--border-danger);
+  color: var(--accent-danger);
 }
 
 .pf-btn-danger:hover {
-  background: var(--danger-bg, rgba(245, 101, 101, 0.35));
+  background: var(--danger-bg);
 }
 
 .pf-btn-text {
@@ -609,8 +609,8 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 0.375rem 1rem;
   border-top: 1px solid var(--surface-hover);
-  background: var(--card-bg, #252525);
-  color: var(--text-muted, #718096);
+  background: var(--toolbar-3);
+  color: var(--text-muted);
   font-size: 0.6875rem;
   flex-shrink: 0;
 }
@@ -633,7 +633,7 @@ onUnmounted(() => {
   border-radius: 0.75rem;
   width: 400px;
   max-width: 90vw;
-  box-shadow: var(--shadow-lg, 0 16px 48px rgba(0, 0, 0, 0.5));
+  box-shadow: var(--shadow-lg);
 }
 
 .pf-modal-head {
@@ -646,20 +646,20 @@ onUnmounted(() => {
 
 .pf-modal-head h3 {
   margin: 0;
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-size: 0.9375rem;
 }
 
 .pf-modal-head button {
   background: none;
   border: none;
-  color: var(--text-muted, #718096);
+  color: var(--text-muted);
   font-size: 1.25rem;
   cursor: pointer;
 }
 
 .pf-modal-head button:hover {
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
 }
 
 .pf-modal-body {
@@ -671,7 +671,7 @@ onUnmounted(() => {
 
 .pf-field label {
   display: block;
-  color: var(--text-secondary, #a0aec0);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   margin-bottom: 0.375rem;
 }
@@ -685,7 +685,7 @@ onUnmounted(() => {
   background: var(--toolbar-4);
   border: 1px solid var(--surface-hover);
   border-radius: 0.375rem;
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-size: 0.8125rem;
   padding: 0.5rem 0.75rem;
   outline: none;
@@ -693,7 +693,7 @@ onUnmounted(() => {
 }
 
 .pf-input:focus {
-  border-color: var(--border-accent, rgba(66, 153, 225, 0.5));
+  border-color: var(--border-accent);
 }
 
 .pf-input-addr {
@@ -736,7 +736,7 @@ onUnmounted(() => {
   background: var(--surface-1);
   border: 1px solid var(--surface-hover);
   border-radius: 0.375rem;
-  color: var(--text-secondary, #a0aec0);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   cursor: pointer;
   transition: all 0.15s;
@@ -748,9 +748,9 @@ onUnmounted(() => {
 }
 
 .pf-radio.active {
-  background: var(--primary-bg, rgba(66, 153, 225, 0.15));
-  border-color: var(--border-accent, rgba(66, 153, 225, 0.4));
-  color: var(--text-primary, #e2e8f0);
+  background: var(--primary-bg);
+  border-color: var(--border-accent);
+  color: var(--text-primary);
 }
 
 .pf-radio input {
@@ -774,13 +774,13 @@ onUnmounted(() => {
 }
 
 .pf-hint {
-  color: var(--text-disabled, #4a5568);
+  color: var(--text-disabled);
   font-size: 0.625rem;
   margin-bottom: 0.375rem;
 }
 
 .pf-error {
-  color: var(--accent-danger, #fc8181);
+  color: var(--accent-danger);
   font-size: 0.75rem;
 }
 

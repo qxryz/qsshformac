@@ -352,6 +352,7 @@ export default defineComponent({
       dockviewRef,
       defaultLayout,
       ctxMenu,
+      themeClass,
       getPanelTitle,
       addPanel,
       closePanel,

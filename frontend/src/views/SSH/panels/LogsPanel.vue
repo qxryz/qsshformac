@@ -380,7 +380,7 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--toolbar-4);
+  background: var(--bg-panel);
   overflow: hidden;
 }
 
@@ -402,15 +402,15 @@ onUnmounted(() => {
 
 .toolbar-left h3 {
   margin: 0;
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-size: 0.875rem;
   font-weight: 600;
 }
 
 .connection-badge {
   padding: 0.25rem 0.5rem;
-  background: var(--primary-bg, rgba(66, 153, 225, 0.2));
-  color: var(--primary-light, #63b3ed);
+  background: var(--primary-bg);
+  color: var(--primary-light);
   border-radius: 0.25rem;
   font-size: 0.6875rem;
   font-weight: 500;
@@ -430,21 +430,21 @@ onUnmounted(() => {
   background: transparent;
   border: 1px solid var(--scrollbar-thumb);
   border-radius: 0.25rem;
-  color: var(--text-secondary, #a0aec0);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .tool-btn:hover {
   background: var(--surface-hover);
-  border-color: var(--scrollbar-thumb-hover, rgba(255, 255, 255, 0.3));
-  color: var(--text-primary, #e2e8f0);
+  border-color: var(--scrollbar-thumb-hover);
+  color: var(--text-primary);
 }
 
 .tool-btn.active {
-  background: var(--primary-bg-hover, rgba(66, 153, 225, 0.3));
-  border-color: var(--accent-primary, #4299e1);
-  color: var(--primary-light, #63b3ed);
+  background: var(--primary-bg-hover);
+  border-color: var(--accent-primary);
+  color: var(--primary-light);
 }
 
 /* 过滤栏 */
@@ -468,7 +468,7 @@ onUnmounted(() => {
   left: 0.625rem;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-muted, #718096);
+  color: var(--text-muted);
   pointer-events: none;
 }
 
@@ -478,20 +478,20 @@ onUnmounted(() => {
   background: var(--toolbar-4);
   border: 1px solid var(--surface-hover);
   border-radius: 0.375rem;
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-size: 0.75rem;
   outline: none;
   transition: all 0.2s;
 }
 
 .search-input:focus {
-  border-color: var(--border-accent, rgba(66, 153, 225, 0.5));
+  border-color: var(--border-accent);
   background: var(--toolbar-4);
-  box-shadow: 0 0 0 2px var(--primary-bg, rgba(66, 153, 225, 0.1));
+  box-shadow: 0 0 0 2px var(--primary-bg);
 }
 
 .search-input::placeholder {
-  color: var(--text-muted, #718096);
+  color: var(--text-muted);
 }
 
 .filter-buttons {
@@ -505,7 +505,7 @@ onUnmounted(() => {
   background: var(--toolbar-4);
   border: 1px solid var(--surface-hover);
   border-radius: 0.375rem;
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-size: 0.75rem;
   outline: none;
   cursor: pointer;
@@ -517,8 +517,8 @@ onUnmounted(() => {
 }
 
 .filter-select:focus {
-  border-color: var(--border-accent, rgba(66, 153, 225, 0.5));
-  box-shadow: 0 0 0 2px var(--primary-bg, rgba(66, 153, 225, 0.1));
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 2px var(--primary-bg);
 }
 
 /* 日志容器 */
@@ -542,7 +542,7 @@ onUnmounted(() => {
 }
 
 .logs-container::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover, rgba(255, 255, 255, 0.3));
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* 空状态 */
@@ -553,7 +553,7 @@ onUnmounted(() => {
   justify-content: center;
   height: 100%;
   gap: 1rem;
-  color: var(--text-muted, #718096);
+  color: var(--text-muted);
 }
 
 .empty-icon {
@@ -567,17 +567,17 @@ onUnmounted(() => {
 
 .retry-btn {
   padding: 0.5rem 1rem;
-  background: var(--primary-bg, rgba(66, 153, 225, 0.2));
-  border: 1px solid var(--border-accent, rgba(66, 153, 225, 0.5));
+  background: var(--primary-bg);
+  border: 1px solid var(--border-accent);
   border-radius: 0.25rem;
-  color: var(--primary-light, #63b3ed);
+  color: var(--primary-light);
   cursor: pointer;
   font-size: 0.75rem;
   transition: all 0.2s;
 }
 
 .retry-btn:hover {
-  background: var(--primary-bg-hover, rgba(66, 153, 225, 0.3));
+  background: var(--primary-bg-hover);
 }
 
 /* 日志卡片 - 简洁现代化设计 */
@@ -616,7 +616,7 @@ onUnmounted(() => {
 
 .log-time {
   font-size: 0.6875rem;
-  color: var(--text-muted, #718096);
+  color: var(--text-muted);
   font-family: 'Courier New', monospace;
 }
 
@@ -629,44 +629,44 @@ onUnmounted(() => {
 }
 
 .type-terminal {
-  background: var(--primary-bg, rgba(66, 153, 225, 0.2));
-  color: var(--primary-light, #63b3ed);
+  background: var(--primary-bg);
+  color: var(--primary-light);
 }
 .type-fileManager {
-  background: var(--success-bg, rgba(72, 187, 120, 0.2));
-  color: var(--success-light, #68d391);
+  background: var(--success-bg);
+  color: var(--success-light);
 }
 .type-connection {
-  background: var(--accent-purple-bg, rgba(159, 122, 234, 0.15));
-  color: var(--accent-purple, #b794f4);
+  background: var(--accent-purple-bg);
+  color: var(--accent-purple);
 }
 .type-system {
-  background: var(--warning-bg, rgba(237, 137, 54, 0.2));
-  color: var(--warning-light, #f6ad55);
+  background: var(--warning-bg);
+  color: var(--warning-light);
 }
 .type-error {
-  background: var(--danger-bg, rgba(245, 101, 101, 0.2));
-  color: var(--accent-danger, #fc8181);
+  background: var(--danger-bg);
+  color: var(--accent-danger);
 }
 .type-security {
-  background: var(--warning-bg, rgba(236, 201, 75, 0.2));
-  color: var(--accent-warning, #faf089);
+  background: var(--warning-bg);
+  color: var(--accent-warning);
 }
 .type-ai {
-  background: var(--accent-purple-bg, rgba(159, 122, 234, 0.15));
-  color: var(--accent-purple, #b794f4);
+  background: var(--accent-purple-bg);
+  color: var(--accent-purple);
 }
 .type-portForward {
-  background: var(--primary-bg, rgba(99, 179, 237, 0.2));
-  color: var(--primary-light, #63b3ed);
+  background: var(--primary-bg);
+  color: var(--primary-light);
 }
 .type-firewall {
-  background: var(--warning-bg, rgba(236, 201, 75, 0.2));
-  color: var(--warning-light, #f6ad55);
+  background: var(--warning-bg);
+  color: var(--warning-light);
 }
 .type-guardian {
-  background: var(--accent-purple-bg, rgba(159, 122, 234, 0.15));
-  color: var(--accent-purple, #b794f4);
+  background: var(--accent-purple-bg);
+  color: var(--accent-purple);
 }
 
 .log-level-badge {
@@ -678,42 +678,42 @@ onUnmounted(() => {
 }
 
 .badge-info {
-  background: var(--primary-bg, rgba(99, 179, 237, 0.2));
-  color: var(--primary-light, #63b3ed);
+  background: var(--primary-bg);
+  color: var(--primary-light);
 }
 .badge-success {
-  background: var(--success-bg, rgba(72, 187, 120, 0.2));
-  color: var(--success-light, #68d391);
+  background: var(--success-bg);
+  color: var(--success-light);
 }
 .badge-warning {
-  background: var(--warning-bg, rgba(236, 201, 75, 0.2));
-  color: var(--accent-warning, #faf089);
+  background: var(--warning-bg);
+  color: var(--accent-warning);
 }
 .badge-error {
-  background: var(--danger-bg, rgba(245, 101, 101, 0.2));
-  color: var(--accent-danger, #fc8181);
+  background: var(--danger-bg);
+  color: var(--accent-danger);
 }
 .badge-low {
-  background: var(--warning-bg, rgba(236, 201, 75, 0.2));
-  color: var(--accent-warning, #faf089);
+  background: var(--warning-bg);
+  color: var(--accent-warning);
 }
 .badge-medium {
-  background: var(--warning-bg, rgba(237, 137, 54, 0.2));
-  color: var(--accent-warning, #fbd38d);
+  background: var(--warning-bg);
+  color: var(--accent-warning);
 }
 .badge-high {
-  background: var(--danger-bg, rgba(245, 101, 101, 0.25));
-  color: var(--danger-light, #feb2b2);
+  background: var(--danger-bg);
+  color: var(--danger-light);
   font-weight: 700;
 }
 .badge-critical {
-  background: var(--danger-bg, rgba(229, 62, 62, 0.3));
-  color: var(--danger-light, #fed7d7);
+  background: var(--danger-bg);
+  color: var(--danger-light);
   font-weight: 700;
 }
 
 .expand-icon {
-  color: var(--text-muted, #718096);
+  color: var(--text-muted);
   transition: transform 0.2s;
   cursor: pointer;
 }
@@ -729,13 +729,13 @@ onUnmounted(() => {
 }
 
 .command-text {
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   font-family: 'Courier New', monospace;
   font-weight: 500;
 }
 
 .message-text {
-  color: var(--text-primary, #e2e8f0);
+  color: var(--text-primary);
   line-height: 1.5;
 }
 
@@ -743,9 +743,9 @@ onUnmounted(() => {
 .log-security-info {
   margin-top: 0.5rem;
   padding: 0.5rem 0.75rem;
-  background: var(--danger-bg, rgba(229, 62, 62, 0.1));
+  background: var(--danger-bg);
   border-radius: 0.25rem;
-  border-left: 2px solid var(--danger-light, #e53e3e);
+  border-left: 2px solid var(--danger-light);
 }
 
 .security-warnings {
@@ -756,7 +756,7 @@ onUnmounted(() => {
 
 .warning-text {
   font-size: 0.75rem;
-  color: var(--danger-light, #feb2b2);
+  color: var(--danger-light);
   line-height: 1.4;
 }
 
@@ -768,15 +768,15 @@ onUnmounted(() => {
 
 .details-label {
   font-size: 0.6875rem;
-  color: var(--text-muted, #718096);
+  color: var(--text-muted);
   margin-bottom: 0.375rem;
   font-weight: 600;
 }
 
 .details-content {
   font-size: 0.75rem;
-  color: var(--text-secondary, #a0aec0);
-  background: var(--surface-3, rgba(0, 0, 0, 0.3));
+  color: var(--text-secondary);
+  background: var(--surface-3);
   padding: 0.625rem;
   border-radius: 0.25rem;
   overflow-x: auto;
@@ -807,7 +807,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.375rem;
   font-size: 0.6875rem;
-  color: var(--text-secondary, #a0aec0);
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
@@ -817,7 +817,7 @@ onUnmounted(() => {
 
 .last-update {
   font-size: 0.6875rem;
-  color: var(--text-muted, #718096);
+  color: var(--text-muted);
 }
 
 /* === 响应式布局 === */
@@ -983,11 +983,11 @@ onUnmounted(() => {
   }
 }
 
-.icon-primary { color: var(--primary-light, #63b3ed); }
-.icon-muted { color: var(--text-muted, #718096); }
-.tag-info { background: var(--primary-bg, rgba(66, 153, 225, 0.2)); color: var(--primary-light, #63b3ed); }
-.tag-success { background: var(--success-bg, rgba(72, 187, 120, 0.2)); color: var(--success-light, #68d391); }
-.tag-warning { background: var(--warning-bg, rgba(237, 137, 54, 0.2)); color: var(--warning-light, #f6ad55); }
-.tag-danger { background: var(--danger-bg, rgba(245, 101, 101, 0.2)); color: var(--accent-danger, #fc8181); }
-.tag-purple { background: var(--accent-purple-bg, rgba(159, 122, 234, 0.15)); color: var(--accent-purple, #b794f4); }
+.icon-primary { color: var(--primary-light); }
+.icon-muted { color: var(--text-muted); }
+.tag-info { background: var(--primary-bg); color: var(--primary-light); }
+.tag-success { background: var(--success-bg); color: var(--success-light); }
+.tag-warning { background: var(--warning-bg); color: var(--warning-light); }
+.tag-danger { background: var(--danger-bg); color: var(--accent-danger); }
+.tag-purple { background: var(--accent-purple-bg); color: var(--accent-purple); }
 </style>

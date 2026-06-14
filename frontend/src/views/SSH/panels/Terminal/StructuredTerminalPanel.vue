@@ -520,6 +520,14 @@ function initXterm() {
   xterm.open(xtRef.value)
   fitAddon.fit()
 
+  // 拦截 Ctrl+←/→，让 document 层的快捷键监听处理
+  xterm.attachCustomKeyEventHandler((e) => {
+    if (e.ctrlKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      return false // 阻止 xterm 处理，让事件冒泡到 document
+    }
+    return true
+  })
+
   // 存储 xterm 实际 DOM 元素（.xterm 容器内的元素）
   xtermEl.value = xtRef.value.querySelector('.xterm') || xtRef.value
 
