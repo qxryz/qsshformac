@@ -1115,9 +1115,25 @@ function exec() {
 // 检测 cd 命令并通知文件管理器
 function detectCdCommand(command) {
   const trimmed = command.trim()
-  // 匹配 cd 命令：cd [选项] <路径>
+  // 匹配 cd 命令：cd 或 cd [选项] <路径>
+  // 裸 cd（无参数）回到 home 目录
+  const isBareCd = trimmed === 'cd'
   const cdMatch = trimmed.match(/^cd\s+(.+)$/)
-  if (!cdMatch) return
+  if (!isBareCd && !cdMatch) return
+
+  // 裸 cd：执行 pwd 获取 home 目录
+  if (isBareCd) {
+    setTimeout(async () => {
+      try {
+        const result = await SSHService.RunCommand(connId, 'cd && pwd')
+        const resolvedPath = result.trim()
+        if (resolvedPath && resolvedPath.startsWith('/')) {
+          Events.Emit('terminal:cd', { connId, path: resolvedPath })
+        }
+      } catch (e) {}
+    }, 300)
+    return
+  }
 
   let targetPath = cdMatch[1].trim()
   // 去掉引号
