@@ -594,14 +594,28 @@ function initXterm() {
     // 回车
     if (data === '\r') {
       showCompletion.value = false
-      if (xtermBuf.trim() && !bm.activeBlock.value) {
-        // 只有在没有活跃命令时才创建新块
-        bm.startCommand(xtermBuf.trim())
-        ch.addCommand(xtermBuf.trim())
-        // 记录日志
-        logTerminalCommand(connId, xtermBuf.trim())
-        // 检测 cd 命令，通知文件管理器
-        detectCdCommand(xtermBuf.trim())
+      // 从 xterm 当前行读取实际命令（包含 Tab 补全后的内容）
+      let actualCmd = xtermBuf.trim()
+      if (xterm) {
+        try {
+          const line = xterm.buffer.active.getLine(xterm.buffer.active.cursorY)
+          if (line) {
+            const lineText = line.translateToString(true).trim()
+            // 去掉提示符（如 "user@host:~$ "），取最后一个 $ 或 # 后面的内容
+            const promptIdx = Math.max(lineText.lastIndexOf('$ '), lineText.lastIndexOf('# '))
+            if (promptIdx >= 0) {
+              actualCmd = lineText.substring(promptIdx + 2).trim()
+            } else if (lineText.length > 0) {
+              actualCmd = lineText
+            }
+          }
+        } catch (e) {}
+      }
+      if (actualCmd && !bm.activeBlock.value) {
+        bm.startCommand(actualCmd)
+        ch.addCommand(actualCmd)
+        logTerminalCommand(connId, actualCmd)
+        detectCdCommand(actualCmd)
       }
       xtermBuf = ''
       send('\r'); return
