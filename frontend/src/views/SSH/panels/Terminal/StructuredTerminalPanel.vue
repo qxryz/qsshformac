@@ -574,44 +574,9 @@ function initXterm() {
       send(data); return
     }
 
-    // Tab 补全（异步支持远程路径）
+    // Tab 补全：经典模式直接发送 Tab 到远程 shell，让 bash/zsh 原生处理补全
     if (cc === 9) {
-      if (showCompletion.value && completionSuggestions.value.length > 0) {
-        // 应用选中的补全
-        const idx = completionRef.value?.selectedIndex || 0
-        applyCompletionClassic(idx)
-      } else if (xtermBuf) {
-        // 先同步获取命令/选项补全
-        const sugs = completion.getSuggestions(xtermBuf, { connId })
-        if (sugs.length === 1) {
-          // 直接补全
-          const completed = completion.applyCompletion(xtermBuf, sugs[0])
-          send('\b'.repeat(xtermBuf.length) + completed)
-          xtermBuf = completed
-        } else if (sugs.length > 1) {
-          // 显示补全列表
-          completionSuggestions.value = sugs
-          showCompletion.value = true
-        }
-        // 如果是路径补全，异步获取远程路径
-        const parts = xtermBuf.split(/\s+/)
-        if (parts.length > 1) {
-          const lastWord = parts[parts.length - 1]
-          if (lastWord.startsWith('/') || lastWord.startsWith('~') || lastWord.startsWith('.')) {
-            completion.getSuggestionsAsync(xtermBuf, { connId }).then(asyncSugs => {
-              if (asyncSugs.length === 1) {
-                const completed = completion.applyCompletion(xtermBuf, asyncSugs[0])
-                send('\b'.repeat(xtermBuf.length) + completed)
-                xtermBuf = completed
-                showCompletion.value = false
-              } else if (asyncSugs.length > 1) {
-                completionSuggestions.value = asyncSugs
-                showCompletion.value = true
-              }
-            })
-          }
-        }
-      }
+      send('\t')
       return
     }
 
@@ -710,7 +675,7 @@ function onInput() {
     completionHideTimer = null
   }
 
-  const sugs = completion.getSuggestions(cmd.value)
+  const sugs = completion.getSuggestions(cmd.value, { connId })
   if (sugs.length > 0) {
     completionSuggestions.value = sugs
     showCompletion.value = true
@@ -723,6 +688,21 @@ function onInput() {
     completionHideTimer = setTimeout(() => {
       showCompletion.value = false
     }, 300)
+  }
+
+  // 异步远程路径补全（对所有参数都尝试，包括相对路径）
+  const parts = cmd.value.split(/\s+/)
+  if (parts.length > 1 && connId) {
+    completion.getSuggestionsAsync(cmd.value, { connId }).then(asyncSugs => {
+      if (asyncSugs.length > 0) {
+        completionSuggestions.value = asyncSugs
+        showCompletion.value = true
+        if (inpAreaRef.value) {
+          const rect = inpAreaRef.value.getBoundingClientRect()
+          completionPos.value = { top: rect.top - 210, left: rect.left }
+        }
+      }
+    })
   }
 }
 
@@ -737,7 +717,7 @@ function applyCompletion(index) {
 // 经典模式补全
 function updateCompletionClassic() {
   if (!xtermBuf) { showCompletion.value = false; return }
-  const sugs = completion.getSuggestions(xtermBuf)
+  const sugs = completion.getSuggestions(xtermBuf, { connId })
   if (sugs.length > 0) {
     completionSuggestions.value = sugs
     showCompletion.value = true
@@ -755,6 +735,28 @@ function updateCompletionClassic() {
     }
   } else {
     showCompletion.value = false
+  }
+
+  // 异步远程路径补全（对所有参数都尝试，包括相对路径）
+  const parts = xtermBuf.split(/\s+/)
+  if (parts.length > 1 && connId) {
+    completion.getSuggestionsAsync(xtermBuf, { connId }).then(asyncSugs => {
+      if (asyncSugs.length > 0) {
+        completionSuggestions.value = asyncSugs
+        showCompletion.value = true
+        if (xterm && xtRef.value) {
+          const rect = xtRef.value.getBoundingClientRect()
+          const cx = xterm.buffer.active.cursorX
+          const cy = xterm.buffer.active.cursorY
+          const cw = rect.width / xterm.cols
+          const ch = rect.height / xterm.rows
+          completionPos.value = {
+            top: rect.top + (cy + 1) * ch + 4,
+            left: rect.left + cx * cw
+          }
+        }
+      }
+    })
   }
 }
 
@@ -927,7 +929,7 @@ function onKey(e) {
     return
   }
 
-  // ========== Tab: 补全（仅 Tab 触发，异步支持远程路径） ==========
+  // ========== Tab: 补全（异步支持远程路径，包括相对路径） ==========
   if (e.key === 'Tab') {
     e.preventDefault()
     if (showCompletion.value && completionSuggestions.value.length > 0) {
@@ -941,21 +943,22 @@ function onKey(e) {
         completionSuggestions.value = sugs
         showCompletion.value = true
       }
-      // 如果是路径补全，异步获取远程路径
+      // 对所有参数都尝试异步远程补全（包括相对路径）
       const parts = cmd.value.split(/\s+/)
-      if (parts.length > 1) {
-        const lastWord = parts[parts.length - 1]
-        if (lastWord.startsWith('/') || lastWord.startsWith('~') || lastWord.startsWith('.')) {
-          completion.getSuggestionsAsync(cmd.value, { connId }).then(asyncSugs => {
-            if (asyncSugs.length === 1) {
-              cmd.value = completion.applyCompletion(cmd.value, asyncSugs[0])
-              showCompletion.value = false
-            } else if (asyncSugs.length > 1) {
-              completionSuggestions.value = asyncSugs
-              showCompletion.value = true
+      if (parts.length > 1 && connId) {
+        completion.getSuggestionsAsync(cmd.value, { connId }).then(asyncSugs => {
+          if (asyncSugs.length === 1) {
+            cmd.value = completion.applyCompletion(cmd.value, asyncSugs[0])
+            showCompletion.value = false
+          } else if (asyncSugs.length > 1) {
+            completionSuggestions.value = asyncSugs
+            showCompletion.value = true
+            if (inpAreaRef.value) {
+              const rect = inpAreaRef.value.getBoundingClientRect()
+              completionPos.value = { top: rect.top - 210, left: rect.left }
             }
-          })
-        }
+          }
+        })
       }
     }
     return
@@ -1003,7 +1006,7 @@ function onKeyButton(e) {
     return
   }
 
-  // Tab: 补全（异步支持远程路径）
+  // Tab: 补全（异步支持远程路径，包括相对路径）
   if (e.key === 'Tab') {
     e.preventDefault()
     if (showCompletion.value && completionSuggestions.value.length > 0) {
@@ -1016,21 +1019,18 @@ function onKeyButton(e) {
         completionSuggestions.value = sugs
         showCompletion.value = true
       }
-      // 如果是路径补全，异步获取远程路径
+      // 对所有参数都尝试异步远程补全（包括相对路径）
       const parts = cmd.value.split(/\s+/)
-      if (parts.length > 1) {
-        const lastWord = parts[parts.length - 1]
-        if (lastWord.startsWith('/') || lastWord.startsWith('~') || lastWord.startsWith('.')) {
-          completion.getSuggestionsAsync(cmd.value, { connId }).then(asyncSugs => {
-            if (asyncSugs.length === 1) {
-              cmd.value = completion.applyCompletion(cmd.value, asyncSugs[0])
-              showCompletion.value = false
-            } else if (asyncSugs.length > 1) {
-              completionSuggestions.value = asyncSugs
-              showCompletion.value = true
-            }
-          })
-        }
+      if (parts.length > 1 && connId) {
+        completion.getSuggestionsAsync(cmd.value, { connId }).then(asyncSugs => {
+          if (asyncSugs.length === 1) {
+            cmd.value = completion.applyCompletion(cmd.value, asyncSugs[0])
+            showCompletion.value = false
+          } else if (asyncSugs.length > 1) {
+            completionSuggestions.value = asyncSugs
+            showCompletion.value = true
+          }
+        })
       }
     }
     return

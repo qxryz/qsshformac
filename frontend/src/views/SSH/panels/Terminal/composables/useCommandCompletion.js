@@ -639,7 +639,7 @@ export function useCommandCompletion() {
     return results
   }
 
-  // 获取补全建议（异步版本，包含远程路径补全）
+  // 获取补全建议（异步版本，包含远程路径补全，支持相对路径）
   async function getSuggestionsAsync(input, context = {}) {
     if (!input) {
       suggestions.value = []
@@ -649,25 +649,30 @@ export function useCommandCompletion() {
     // 先获取同步结果（命令、选项等）
     const syncResults = getSuggestions(input, context)
 
-    // 如果有路径补全需求，尝试远程补全
+    // 如果有参数需要补全，尝试远程补全
     const parts = input.split(/\s+/)
-    if (parts.length > 1) {
+    if (parts.length > 1 && context.connId) {
       const currentWord = parts[parts.length - 1]
-      if ((currentWord.startsWith('/') || currentWord.startsWith('~') || currentWord.startsWith('.')) && context.connId) {
-        try {
-          const remotePaths = await getRemotePathCompletions(currentWord, context.connId)
-          if (remotePaths.length > 0) {
-            // 移除本地路径补全结果，替换为远程结果
-            const nonPathResults = syncResults.filter(r => r.type !== 'path')
-            const finalResults = [...nonPathResults, ...remotePaths].slice(0, 20)
-            suggestions.value = finalResults
-            selectedIndex.value = finalResults.length > 0 ? 0 : -1
-            isVisible.value = finalResults.length > 0
-            return finalResults
-          }
-        } catch (e) {
-          // 远程补全失败，保留本地结果
+      try {
+        let remotePaths
+        if (currentWord.startsWith('/') || currentWord.startsWith('~') || currentWord.startsWith('.')) {
+          // 绝对路径或特殊路径
+          remotePaths = await getRemotePathCompletions(currentWord, context.connId)
+        } else {
+          // 相对路径：列出当前工作目录
+          remotePaths = await getRemotePathCompletionsCwd(currentWord, context.connId)
         }
+        if (remotePaths.length > 0) {
+          // 移除本地路径补全结果，替换为远程结果
+          const nonPathResults = syncResults.filter(r => r.type !== 'path')
+          const finalResults = [...nonPathResults, ...remotePaths].slice(0, 20)
+          suggestions.value = finalResults
+          selectedIndex.value = finalResults.length > 0 ? 0 : -1
+          isVisible.value = finalResults.length > 0
+          return finalResults
+        }
+      } catch (e) {
+        // 远程补全失败，保留本地结果
       }
     }
 
@@ -749,6 +754,35 @@ export function useCommandCompletion() {
           description: f.isDir ? '目录' : '文件'
         }
       })
+  }
+
+  // 远程路径补全（当前工作目录，用于相对路径）
+  async function getRemotePathCompletionsCwd(partial, connId) {
+    try {
+      const cacheKey = `${connId}:./`
+      const now = Date.now()
+      let files
+      if (pathCache.key === cacheKey && now - pathCache.timestamp < PATH_CACHE_TTL) {
+        files = pathCache.results
+      } else {
+        files = await SSHService.ListDirectory(connId, './')
+        if (!files || !Array.isArray(files)) {
+          return []
+        }
+        pathCache = { key: cacheKey, results: files, timestamp: now }
+      }
+      return files
+        .filter(f => f.name.toLowerCase().startsWith(partial.toLowerCase()))
+        .map(f => ({
+          type: 'path',
+          value: f.name + (f.isDir ? '/' : ''),
+          display: f.name + (f.isDir ? '/' : ''),
+          description: f.isDir ? '目录' : '文件'
+        }))
+    } catch (e) {
+      console.warn('[Completion] 远程路径补全(CWD)失败:', e)
+      return []
+    }
   }
 
   // 本地静态路径补全（回退方案）
