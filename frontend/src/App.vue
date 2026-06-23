@@ -9,6 +9,7 @@ import { ref, onMounted } from 'vue'
 import Message from './components/Message.vue'
 import ConfirmDialog from './components/ConfirmDialog.vue'
 import { setMessageInstance } from './utils/message'
+import { Events } from '@wailsio/runtime'
 
 const messageRef = ref(null)
 
@@ -17,6 +18,8 @@ onMounted(() => {
   if (messageRef.value) {
     setMessageInstance(messageRef.value)
   }
+  // 通知后端窗口已就绪，可以恢复位置了
+  Events.Emit('app:window-ready')
 })
 </script>
 

@@ -153,7 +153,7 @@ export default defineComponent({
           id: panelId,
           component,
           title,
-          params: { connId: props.connId, sessionId, isAI }
+          params: { connId: props.connId, sessionId, isAI, panelId }
         }
         if (referencePanel && position) {
           // 分割模式：添加到指定面板旁边

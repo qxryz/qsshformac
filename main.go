@@ -113,17 +113,22 @@ func main() {
 		BackgroundColour: application.NewRGB(255, 255, 255),
 	})
 
-	// 先显示窗口，再恢复位置（Wails v3 中 SetPosition/SetSize 在窗口未显示时可能不生效）
-	mainWindow.Show()
-
 	// 尝试恢复主窗口位置，否则使用默认尺寸居中
-	mainWindowRegistered := windowManager.RestoreMainWindowPosition(mainWindow)
-	if !mainWindowRegistered {
-		w, h := calculateWindowSize(app)
-		mainWindow.SetSize(w, h)
-		mainWindow.Center()
-		fmt.Printf("[Main] 主窗口大小: %dx%d\n", w, h)
-	}
+	// 注意：SetPosition/SetSize 在 app.Run() 之前可能不生效
+	// 所以这里先设置默认尺寸，等窗口显示后再恢复位置
+	w, h := calculateWindowSize(app)
+	mainWindow.SetSize(w, h)
+	mainWindow.Center()
+	fmt.Printf("[Main] 主窗口默认大小: %dx%d\n", w, h)
+
+	// 监听前端通知：窗口已就绪，可以恢复位置了
+	app.Event.On("app:window-ready", func(event *application.CustomEvent) {
+		fmt.Println("[Main] 收到窗口就绪事件，尝试恢复主窗口位置")
+		registered := windowManager.RestoreMainWindowPosition(mainWindow)
+		if registered {
+			fmt.Println("[Main] ✓ 主窗口位置已恢复")
+		}
+	})
 
 	// 设置分组关闭回调（所有 SSH 窗口关闭后自动显示主窗口）
 	windowManager.SetOnGroupClose(func(groupID string) {

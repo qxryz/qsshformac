@@ -526,8 +526,8 @@ onMounted(async () => {
   })
   // 监听面板激活事件，切换到 AI 面板时自动滚动到最新消息
   Events.On('dockview:panel-activated', (e) => {
-    // AI 面板的 id 以 'ai_' 开头
-    if (e?.data?.panelId?.startsWith('ai_')) {
+    // AI 面板的 id 是 'aiChat'
+    if (e?.data?.panelId === 'aiChat') {
       scroll()
     }
   })

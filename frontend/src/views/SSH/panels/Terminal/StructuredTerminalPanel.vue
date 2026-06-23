@@ -217,6 +217,7 @@ const props = defineProps({ params: { type: Object, default: () => ({}) } })
 const connId = inject('connId')
 const dp = props.params?.params || props.params
 const sessionId = dp?.sessionId || `term_${Date.now()}`
+const dockviewPanelId = dp?.panelId || '' // Dockview 面板 ID（如 terminal_1）
 const isAI = dp?.isAI || false
 
 const bm = useBlockManager()
@@ -437,7 +438,7 @@ onMounted(async () => {
 
   // 面板切换时自动聚焦终端，确保可以立即输入命令
   Events.On('dockview:panel-activated', (e) => {
-    if (e?.data?.panelId === sessionId) {
+    if (e?.data?.panelId === dockviewPanelId) {
       nextTick(() => {
         if (viewMode.value === 'classic' && xterm) {
           xterm.focus()
