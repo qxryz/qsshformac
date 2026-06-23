@@ -297,9 +297,10 @@ export default defineComponent({
       })
 
       // 面板切换时通知对应面板（用于 AI 聊天滚动到底部、终端聚焦等）
-      dockviewApi.onDidActivePanelChange((event) => {
-        if (event) {
-          Events.Emit('dockview:panel-activated', { panelId: event.id })
+      dockviewApi.onDidActivePanelChange((panel) => {
+        if (panel) {
+          // 使用 document 事件（同窗口内比 Wails Events 更可靠）
+          document.dispatchEvent(new CustomEvent('dockview:panel-activated', { detail: { panelId: panel.id } }))
         }
       })
 

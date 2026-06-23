@@ -437,8 +437,8 @@ onMounted(async () => {
   Events.On('ssh:connection-reconnected', onReconnected)
 
   // 面板切换时自动聚焦终端，确保可以立即输入命令
-  Events.On('dockview:panel-activated', (e) => {
-    if (e?.data?.panelId === dockviewPanelId) {
+  const onPanelActivated = (e) => {
+    if (e.detail?.panelId === dockviewPanelId) {
       nextTick(() => {
         if (viewMode.value === 'classic' && xterm) {
           xterm.focus()
@@ -447,7 +447,8 @@ onMounted(async () => {
         }
       })
     }
-  })
+  }
+  document.addEventListener('dockview:panel-activated', onPanelActivated)
 
   // 全局键盘监听（Ctrl+F 搜索）
   document.addEventListener('keydown', onGlobalKey)
@@ -470,6 +471,7 @@ onUnmounted(() => {
   // 不调用 Events.Off，避免误移除其他终端的监听器
   // handler 内部检查 disposed，不会处理已关闭终端的事件
   document.removeEventListener('keydown', onGlobalKey)
+  document.removeEventListener('dockview:panel-activated', onPanelActivated)
   SSHService.CloseShellSessionByID(connId, sessionId).catch(() => {})
   resizeObs?.disconnect()
   xterm?.dispose()

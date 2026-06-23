@@ -113,22 +113,20 @@ func main() {
 		BackgroundColour: application.NewRGB(255, 255, 255),
 	})
 
-	// 尝试恢复主窗口位置，否则使用默认尺寸居中
-	// 注意：SetPosition/SetSize 在 app.Run() 之前可能不生效
-	// 所以这里先设置默认尺寸，等窗口显示后再恢复位置
+	// 设置默认尺寸居中（app.Run() 前只能设置默认值）
 	w, h := calculateWindowSize(app)
 	mainWindow.SetSize(w, h)
 	mainWindow.Center()
 	fmt.Printf("[Main] 主窗口默认大小: %dx%d\n", w, h)
 
-	// 监听前端通知：窗口已就绪，可以恢复位置了
-	app.Event.On("app:window-ready", func(event *application.CustomEvent) {
-		fmt.Println("[Main] 收到窗口就绪事件，尝试恢复主窗口位置")
-		registered := windowManager.RestoreMainWindowPosition(mainWindow)
-		if registered {
+	// 在 app.Run() 启动后延迟恢复主窗口位置
+	// app.Run() 是阻塞的，所以用 goroutine 在其启动后恢复位置
+	go func() {
+		time.Sleep(800 * time.Millisecond) // 等待窗口完全初始化
+		if windowManager.RestoreMainWindowPosition(mainWindow) {
 			fmt.Println("[Main] ✓ 主窗口位置已恢复")
 		}
-	})
+	}()
 
 	// 设置分组关闭回调（所有 SSH 窗口关闭后自动显示主窗口）
 	windowManager.SetOnGroupClose(func(groupID string) {
