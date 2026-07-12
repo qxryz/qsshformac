@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title">
+  <title id="title">Zhouzhou Tools</title>
+  <defs>
+    <mask id="weave">
+      <rect width="96" height="96" fill="white"/>
+      <path
+        d="M30 38h54L44 78h44"
+        fill="none"
+        stroke="black"
+        stroke-width="16"
+        stroke-linecap="square"
+        stroke-linejoin="miter"
+      />
+    </mask>
+  </defs>
+  <!-- 后层 Z：在交叉处被前层切开，形成互锁 -->
+  <path
+    d="M10 18h50L20 58h38"
+    fill="none"
+    stroke="#171713"
+    stroke-width="9"
+    stroke-linecap="square"
+    stroke-linejoin="miter"
+    mask="url(#weave)"
+  />
+  <!-- 前层 Z -->
+  <path
+    d="M30 38h54L44 78h44"
+    fill="none"
+    stroke="#171713"
+    stroke-width="9"
+    stroke-linecap="square"
+    stroke-linejoin="miter"
+  />
+</svg>

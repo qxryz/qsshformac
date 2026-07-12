@@ -56,7 +56,7 @@ func main() {
 	}
 
 	fmt.Println("========================================")
-	fmt.Printf("  启SSH 私有云端 v%s (WSS)\n", Version)
+	fmt.Printf("  舟SSH 私有云端 v%s (WSS)\n", Version)
 	fmt.Println("========================================")
 	fmt.Printf("  端口: %d\n", cfg.Port)
 	fmt.Printf("  令牌: %s\n", crypto.MaskToken(cfg.Token))

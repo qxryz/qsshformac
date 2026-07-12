@@ -20,5 +20,5 @@ func (g *GreetService) GetVersion() string {
 
 // GetAppName 获取应用名称
 func (g *GreetService) GetAppName() string {
-	return "启SSH"
+	return "舟SSH"
 }

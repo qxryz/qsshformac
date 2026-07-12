@@ -6,7 +6,7 @@
       <!-- 头部 -->
       <div class="ai-header">
         <div class="header-left">
-          <span class="header-title">AI 助手</span>
+          <span class="header-title">舟舟 AI</span>
           <span v-if="!configured" class="badge warn">未配置</span>
           <span v-else class="badge ok">{{ config.model }}</span>
         </div>
@@ -25,7 +25,7 @@
         <!-- 空状态 -->
         <div v-if="timeline.length===0 && !loading" class="empty">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M10 21h4"/><path d="M9 9h6"/><path d="M12 9v4"/></svg>
-          <p class="empty-t">SSH AI 助手</p>
+          <p class="empty-t">舟舟 · SSH AI 助手</p>
           <p class="empty-h">分析服务器状态、执行命令、排查问题</p>
           <div class="shortcuts">
             <button @click="quick('查看当前服务器的系统信息')">系统信息</button>
@@ -227,8 +227,8 @@ marked.setOptions({ breaks: true, gfm: true })
 const md = (t) => t ? marked.parse(t, {renderer: mdRenderer}) : ''
 
 const PRESETS = {
-  'MiniMax': { api_endpoint:'https://api.mc-plfd-host.top/v1', model:'MiniMax-M2.1-highspeed' },
-  'MiMo': { api_endpoint:'https://token-plan-cn.xiaomimimo.com/v1', model:'mimo-v2.5-pro' },
+  'MiniMax': { api_endpoint:'https://api.minimaxi.com/v1', model:'MiniMax-M2.1-highspeed' },
+  'MiMo': { api_endpoint:'https://api.xiaomimimo.com/v1', model:'mimo-v2.5-pro' },
   'OpenAI': { api_endpoint:'https://api.openai.com/v1', model:'gpt-4' },
   '火山豆包': { api_endpoint:'https://ark.cn-beijing.volces.com/api/v3', model:'doubao-seed-1-6-251015' },
   'Ollama': { api_endpoint:'http://localhost:11434/v1', api_key:'ollama', model:'llama3.2' },

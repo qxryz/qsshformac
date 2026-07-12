@@ -187,7 +187,7 @@ export function isConnected() {
 // ==================== 工具 ====================
 
 function getDeviceName() {
-  return window.location.hostname || '启SSH客户端'
+  return window.location.hostname || '舟SSH客户端'
 }
 
 function getLocalHost() {

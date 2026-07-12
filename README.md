@@ -1,6 +1,6 @@
-# qssh for mac（启SSH macOS 版）
+# 舟SSH（qssh for mac）
 
-一个中文的 SSH 远程连接工具，开源、好看。本仓库是 [nanxiangxi/qssh](https://github.com/nanxiangxi/qssh) 的 **macOS (Apple Silicon) 移植版**。
+一个中文的 SSH 远程连接工具，开源、好看。本仓库是 [nanxiangxi/qssh](https://github.com/nanxiangxi/qssh) 的 **macOS (Apple Silicon) 移植版**，并更名为「舟SSH」，内置 AI 助手「舟舟」。
 
 ## 关于本移植版
 

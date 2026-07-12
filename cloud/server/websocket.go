@@ -232,8 +232,8 @@ func generateCertIfNeeded(certFile, keyFile string) error {
 	template := x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
-			Organization: []string{"启SSH Cloud"},
-			CommonName:   "启SSH Private Cloud",
+			Organization: []string{"舟SSH Cloud"},
+			CommonName:   "舟SSH Private Cloud",
 		},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().Add(10 * 365 * 24 * time.Hour),

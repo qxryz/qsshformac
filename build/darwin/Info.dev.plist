@@ -4,7 +4,7 @@
         <key>CFBundlePackageType</key>
             <string>APPL</string>
         <key>CFBundleName</key>
-            <string>启SSH Dev</string>
+            <string>舟SSH Dev</string>
         <key>CFBundleExecutable</key>
             <string>pzssh</string>
         <key>CFBundleIdentifier</key>

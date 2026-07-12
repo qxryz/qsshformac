@@ -76,9 +76,9 @@ const router = createRouter({
 router.beforeEach((to, from) => {
   const title = to.meta.title
   if (title) {
-    document.title = `${title} - 启SSH`
+    document.title = `${title} - 舟SSH`
   } else {
-    document.title = '启SSH - SSH工具'
+    document.title = '舟SSH - SSH工具'
   }
   return true
 })

@@ -27,7 +27,7 @@ var trayIcon []byte
 // 版本信息
 const (
 	AppVersion = "0.3.2"
-	AppName    = "启SSH"
+	AppName    = "舟SSH"
 )
 
 func init() {
@@ -110,7 +110,7 @@ func main() {
 
 	windowOpts := application.WebviewWindowOptions{
 		Name:             "main",
-		Title:            fmt.Sprintf("启SSH - SSH工具 (v%s)", AppVersion),
+		Title:            fmt.Sprintf("舟SSH - SSH工具 (v%s)", AppVersion),
 		URL:              "/",
 		DisableResize:    false,
 		Frameless:        true,

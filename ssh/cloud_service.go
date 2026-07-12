@@ -54,7 +54,7 @@ func (cs *CloudService) Connect(serverAddr, token string) bool {
 
 	// 注册设备
 	fmt.Println("[CloudService] 正在注册设备...")
-	if err := c.Register("启SSH客户端", "localhost", runtime.GOOS, "0.3.0"); err != nil {
+	if err := c.Register("舟SSH客户端", "localhost", runtime.GOOS, "0.3.0"); err != nil {
 		fmt.Printf("[CloudService] ✗ 注册失败: %v\n", err)
 		c.Disconnect()
 		cs.emitStatus(false, err.Error())

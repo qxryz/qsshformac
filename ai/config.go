@@ -58,7 +58,7 @@ func getDefaultConfig() *AIConfig {
 		Temperature: 1.0,
 		MaxTokens:   4096,
 		TopP:        0.95,
-		SystemPrompt: `你是"启SSH AI"，一个专业的 SSH 服务器管理和系统运维 AI 助手。
+		SystemPrompt: `你是"舟舟"，一个专业的 SSH 服务器管理和系统运维 AI 助手。
 
 【核心规则】
 1. 始终使用中文回复。

@@ -2,34 +2,37 @@
   <!-- 顶部标题栏 -->
   <header class="app-header">
     <div class="header-left">
-      <!-- macOS 红绿灯窗口控制 -->
-      <div class="traffic-lights" @mouseenter="lightsHover = true" @mouseleave="lightsHover = false">
-        <button class="light close" data-tip="关闭窗口|⌘W" @click="Window.Close()">
-          <svg v-if="lightsHover" width="8" height="8" viewBox="0 0 8 8">
-            <line x1="1.5" y1="1.5" x2="6.5" y2="6.5" stroke="rgba(77,0,0,0.85)" stroke-width="1.2" stroke-linecap="round"/>
-            <line x1="6.5" y1="1.5" x2="1.5" y2="6.5" stroke="rgba(77,0,0,0.85)" stroke-width="1.2" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <button class="light minimize" data-tip="最小化|⌘M" @click="Window.Minimise()">
-          <svg v-if="lightsHover" width="8" height="8" viewBox="0 0 8 8">
-            <line x1="1" y1="4" x2="7" y2="4" stroke="rgba(120,70,0,0.85)" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <button class="light zoom" :data-tip="isMaximised ? '恢复大小' : '缩放'" @click="toggleMaximise">
-          <svg v-if="lightsHover" width="8" height="8" viewBox="0 0 8 8">
-            <path d="M1.5 4.5 L1.5 6.5 L3.5 6.5 Z" fill="rgba(0,80,0,0.85)"/>
-            <path d="M6.5 3.5 L6.5 1.5 L4.5 1.5 Z" fill="rgba(0,80,0,0.85)"/>
-          </svg>
-        </button>
-      </div>
       <div class="logo-container">
-        <img src="../../../零启.svg" alt="启SSH Logo" class="logo" />
-        <span class="app-name">启SSH</span>
+        <img src="../../../zhouzhou-logo.svg" alt="舟SSH Logo" class="logo" />
+        <span class="app-name">舟SSH</span>
         <span class="version">v{{ version }}</span>
       </div>
     </div>
 
-    <div class="header-right"></div>
+    <div class="header-right">
+      <div class="window-controls">
+        <button class="control-btn minimize" data-tip="最小化|⌘M" @click="Window.Minimise()">
+          <svg width="12" height="12" viewBox="0 0 12 12">
+            <line x1="0" y1="6" x2="12" y2="6" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </button>
+        <button class="control-btn maximize" :data-tip="isMaximised ? '恢复' : '最大化'" @click="toggleMaximise">
+          <svg v-if="!isMaximised" width="12" height="12" viewBox="0 0 12 12">
+            <rect x="1" y="1" width="10" height="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          </svg>
+          <svg v-else width="12" height="12" viewBox="0 0 12 12">
+            <rect x="3" y="1" width="8" height="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <rect x="1" y="3" width="8" height="8" stroke="currentColor" stroke-width="1.5" fill="white"/>
+          </svg>
+        </button>
+        <button class="control-btn close" data-tip="关闭窗口|⌘W" @click="Window.Close()">
+          <svg width="12" height="12" viewBox="0 0 12 12">
+            <line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
   </header>
 </template>
 
@@ -40,7 +43,6 @@ import { GetVersion } from '../../../../bindings/changeme/ssh/greetservice.js'
 
 const isMaximised = ref(false)
 const version = ref('0.2.0')
-const lightsHover = ref(false)
 
 onMounted(async () => {
   try {
@@ -78,8 +80,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 3.25rem;
-  padding: 0 1.25rem 0 1rem;
+  height: 3.5rem;
+  padding: 0 1.25rem;
   background: transparent;
   border-bottom: none;
   --wails-draggable: drag;
@@ -88,43 +90,7 @@ onMounted(() => {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
 }
-
-/* ===== macOS 红绿灯 ===== */
-.traffic-lights {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 4px 0;
-  --wails-draggable: no-drag;
-  -webkit-app-region: no-drag;
-}
-
-.light {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 0.5px solid rgba(0, 0, 0, 0.2);
-  padding: 0;
-  cursor: default;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: filter 0.15s ease;
-}
-
-.light svg {
-  display: block;
-}
-
-.light.close    { background: #ff5f57; }
-.light.minimize { background: #febc2e; }
-.light.zoom     { background: #28c840; }
-
-.light:active { filter: brightness(0.8); }
-
-/* 窗口失焦时变灰（简化：跟随 body 状态可后续扩展） */
 
 .logo-container {
   display: flex;
@@ -158,5 +124,36 @@ onMounted(() => {
 .header-right {
   display: flex;
   align-items: center;
+}
+
+.window-controls {
+  display: flex;
+  gap: 0.5rem;
+  -webkit-app-region: no-drag;
+  --wails-draggable: no-drag;
+}
+
+.control-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.control-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.control-btn.close:hover {
+  background: var(--danger-bg);
+  color: var(--accent-danger);
 }
 </style>
