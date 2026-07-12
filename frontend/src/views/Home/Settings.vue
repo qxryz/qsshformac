@@ -128,7 +128,7 @@
         </div>
         <div class="config-item">
           <div class="config-info">
-            <div class="config-label">Ctrl+← / Ctrl+→</div>
+            <div class="config-label">⌘+← / ⌘+→（或 Ctrl）</div>
             <div class="config-desc">快速切换 SSH 标签页。</div>
           </div>
           <div class="config-control">
@@ -140,7 +140,7 @@
         </div>
         <div class="config-item">
           <div class="config-info">
-            <div class="config-label">Ctrl+Shift+S</div>
+            <div class="config-label">⌘+Shift+S（或 Ctrl）</div>
             <div class="config-desc">快速保存当前选中的连接。</div>
           </div>
           <div class="config-control">
@@ -152,7 +152,7 @@
         </div>
         <div class="config-item">
           <div class="config-info">
-            <div class="config-label">Ctrl+Shift+U</div>
+            <div class="config-label">⌘+Shift+U（或 Ctrl）</div>
             <div class="config-desc">快速上传连接配置到云端。</div>
           </div>
           <div class="config-control">
@@ -164,7 +164,7 @@
         </div>
         <div class="config-item">
           <div class="config-info">
-            <div class="config-label">Ctrl+Shift+D</div>
+            <div class="config-label">⌘+Shift+D（或 Ctrl）</div>
             <div class="config-desc">快速从云端下载连接配置。</div>
           </div>
           <div class="config-control">

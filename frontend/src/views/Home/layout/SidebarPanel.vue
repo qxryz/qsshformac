@@ -989,7 +989,7 @@ const openSettings = () => {
   gap: 0.25rem;
   color: var(--text-muted);
   font-size: 0.6875rem;
-  font-family: 'Consolas', monospace;
+  font-family: 'SF Mono', Menlo, Monaco, 'Consolas', monospace;
 }
 
 .address-icon {

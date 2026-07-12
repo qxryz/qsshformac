@@ -4,26 +4,31 @@
         <key>CFBundlePackageType</key>
             <string>APPL</string>
         <key>CFBundleName</key>
-            <string>My Product</string>
+            <string>启SSH</string>
+        <key>CFBundleDisplayName</key>
+            <string>启SSH</string>
         <key>CFBundleExecutable</key>
-            <string>pzssh.exe</string>
+            <string>pzssh</string>
         <key>CFBundleIdentifier</key>
-            <string>com.example.pzssh</string>
+            <string>com.nanxiangxi.qissh</string>
         <key>CFBundleVersion</key>
-            <string>0.1.0</string>
-        <key>CFBundleGetInfoString</key>
-            <string>This is a comment</string>
+            <string>0.3.2</string>
         <key>CFBundleShortVersionString</key>
-            <string>0.1.0</string>
+            <string>0.3.2</string>
         <key>CFBundleIconFile</key>
             <string>icons</string>
         <key>CFBundleIconName</key>
             <string>appicon</string>
         <key>LSMinimumSystemVersion</key>
-            <string>10.15.0</string>
+            <string>11.0.0</string>
         <key>NSHighResolutionCapable</key>
             <string>true</string>
         <key>NSHumanReadableCopyright</key>
-            <string>© 2026, My Company</string>
+            <string>© 2026 qssh. Open source under original license.</string>
+        <key>NSAppTransportSecurity</key>
+            <dict>
+                <key>NSAllowsLocalNetworking</key>
+                <true/>
+            </dict>
     </dict>
 </plist>

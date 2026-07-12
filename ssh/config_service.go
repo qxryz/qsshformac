@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"sync"
 
+	"changeme/apppaths"
+
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
@@ -155,33 +157,9 @@ func getDefaultConfig() *AppConfig {
 }
 
 // 获取数据目录（与 storage.go 保持一致）
+// macOS: ~/Library/Application Support/qssh/config
 func getDataDir() string {
-	// 获取可执行文件目录
-	exePath, err := os.Executable()
-	if err != nil {
-		fmt.Printf("[ConfigService] 获取可执行文件路径失败: %v，使用当前目录\n", err)
-		// 降级到当前工作目录
-		cwd, _ := os.Getwd()
-		configDir := filepath.Join(cwd, "data", "config")
-		os.MkdirAll(configDir, 0755)
-		return configDir
-	}
-	exeDir := filepath.Dir(exePath)
-	fmt.Printf("[ConfigService] 可执行文件目录: %s\n", exeDir)
-
-	// 配置文件目录：exeDir/data/config
-	configDir := filepath.Join(exeDir, "data", "config")
-	fmt.Printf("[ConfigService] 尝试创建配置目录: %s\n", configDir)
-	if err := os.MkdirAll(configDir, 0755); err != nil {
-		fmt.Printf("[ConfigService] 创建配置目录失败: %v\n", err)
-		// 降级到 data 目录
-		configDir = filepath.Join(exeDir, "data")
-		if err := os.MkdirAll(configDir, 0755); err != nil {
-			// 降级到程序目录
-			configDir = exeDir
-		}
-	}
-
+	configDir := apppaths.SubDir("config")
 	fmt.Printf("[ConfigService] ✓ 配置目录: %s\n", configDir)
 	return configDir
 }

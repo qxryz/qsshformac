@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"changeme/apppaths"
+
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
@@ -60,14 +62,7 @@ func (wm *WindowManager) SetOnGroupClose(callback func(groupID string)) {
 
 // getWindowPositionsFile 获取窗口位置文件路径
 func getWindowPositionsFile() string {
-	exePath, err := os.Executable()
-	if err != nil {
-		return "data/config/window_positions.json"
-	}
-	exeDir := filepath.Dir(exePath)
-	dir := filepath.Join(exeDir, "data", "config")
-	os.MkdirAll(dir, 0755)
-	return filepath.Join(dir, "window_positions.json")
+	return filepath.Join(apppaths.SubDir("config"), "window_positions.json")
 }
 
 // loadPositions 从文件加载窗口位置

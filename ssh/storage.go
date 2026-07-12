@@ -11,6 +11,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"changeme/apppaths"
 )
 
 // ConnectionInfo SSH连接信息
@@ -90,46 +92,25 @@ func decryptString(encryptedText string, key []byte) (string, error) {
 
 // NewStorageManager 创建存储管理器
 func NewStorageManager() *StorageManager {
-	// 获取程序运行目录
-	exePath, err := os.Executable()
-	if err != nil {
-		// 如果获取失败，使用当前工作目录
-		exePath = "."
-	}
-
-	// 获取程序所在目录
-	exeDir := filepath.Dir(exePath)
-
 	// 创建 data/cache 目录（先清空旧缓存）
-	cacheDataDir := filepath.Join(exeDir, "data", "cache")
+	// macOS: ~/Library/Application Support/qssh/cache
+	cacheDataDir := filepath.Join(apppaths.DataDir(), "cache")
 	fmt.Printf("[StorageManager] 缓存数据目录: %s\n", cacheDataDir)
 	// 清空缓存目录，确保旧数据不干扰
 	if err := os.RemoveAll(cacheDataDir); err != nil {
 		fmt.Printf("[StorageManager] 清空缓存目录失败: %v\n", err)
 	}
 	if err := os.MkdirAll(cacheDataDir, 0755); err != nil {
-		fmt.Printf("[StorageManager] 创建 data/cache 目录失败: %v\n", err)
-		cacheDataDir = filepath.Join(exeDir, "data") // 降级到 data 目录
-		if err := os.MkdirAll(cacheDataDir, 0755); err != nil {
-			fmt.Printf("[StorageManager] 创建 data 目录失败: %v\n", err)
-			cacheDataDir = exeDir // 降级到程序目录
-		}
+		fmt.Printf("[StorageManager] 创建 cache 目录失败: %v\n", err)
+		cacheDataDir = apppaths.DataDir() // 降级到 data 目录
 	}
 
 	cacheDataFile := filepath.Join(cacheDataDir, "connections.json")
 	fmt.Printf("[StorageManager] 缓存数据文件: %s\n", cacheDataFile)
-	
-	// 创建 data/persistent 目录用于永久保存
-	permanentDataDir := filepath.Join(exeDir, "data", "persistent")
+
+	// 创建 persistent 目录用于永久保存
+	permanentDataDir := apppaths.SubDir("persistent")
 	fmt.Printf("[StorageManager] 永久数据目录: %s\n", permanentDataDir)
-	if err := os.MkdirAll(permanentDataDir, 0755); err != nil {
-		fmt.Printf("[StorageManager] 创建 data/persistent 目录失败: %v\n", err)
-		permanentDataDir = filepath.Join(exeDir, "data") // 降级到 data 目录
-		if err := os.MkdirAll(permanentDataDir, 0755); err != nil {
-			fmt.Printf("[StorageManager] 创建 data 目录失败: %v\n", err)
-			permanentDataDir = exeDir // 降级到程序目录
-		}
-	}
 
 	permanentDataFile := filepath.Join(permanentDataDir, "connections.json")
 	fmt.Printf("[StorageManager] 永久数据文件: %s\n", permanentDataFile)

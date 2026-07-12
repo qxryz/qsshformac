@@ -1,4 +1,4 @@
-name: Build Windows EXE
+name: Build macOS App
 
 on:
   push:
@@ -10,11 +10,11 @@ permissions:
   contents: write
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  build-macos:
+    runs-on: macos-latest
     strategy:
       matrix:
-        arch: [amd64, arm64]
+        arch: [arm64]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install Wails CLI
-        run: go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-alpha.74
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@latest
 
       - name: Go Mod Tidy
         run: go mod tidy
@@ -48,27 +48,25 @@ jobs:
         env:
           PRODUCTION: 'true'
 
-      - name: Generate syso
-        working-directory: build
-        run: wails3 generate syso -arch ${{ matrix.arch }} -icon windows/icon.ico -manifest windows/wails.exe.manifest -info windows/info.json -out ../wails_windows_${{ matrix.arch }}.syso
-
-      - name: Build Windows EXE
+      - name: Build macOS App Bundle
         env:
-          GOOS: windows
           GOARCH: ${{ matrix.arch }}
-          CGO_ENABLED: '0'
+          CGO_ENABLED: '1'
+        run: wails3 task darwin:package
+
+      - name: Zip App Bundle
         run: |
-          go build -tags production -trimpath -buildvcs=false -ldflags="-w -s -H windowsgui" -o "bin/pzssh-${{ matrix.arch }}.exe"
-          Remove-Item *.syso -Force -ErrorAction SilentlyContinue
+          cd bin
+          zip -r "pzssh-macos-${{ matrix.arch }}.zip" pzssh.app
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pzssh-windows-${{ matrix.arch }}
-          path: bin/pzssh-${{ matrix.arch }}.exe
+          name: pzssh-macos-${{ matrix.arch }}
+          path: bin/pzssh-macos-${{ matrix.arch }}.zip
 
   release:
-    needs: build-windows
+    needs: build-macos
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
@@ -81,5 +79,5 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/*.exe
+          files: artifacts/*.zip
           generate_release_notes: true

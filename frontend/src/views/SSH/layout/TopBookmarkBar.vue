@@ -251,7 +251,7 @@ function handleKeyboard(e) {
   if (!shortcutsEnabled) return
 
   // Ctrl+←/→ 切换标签
-  if (e.ctrlKey && !e.shiftKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
     if (!configStore.get('shortcuts', 'switchTab')) return
     const tabList = tabs.value
     if (tabList.length < 2) return
@@ -274,7 +274,7 @@ function handleKeyboard(e) {
   }
 
   // Ctrl+Shift+S 保存当前分组
-  if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
     if (!configStore.get('shortcuts', 'saveGroup')) return
     console.log('[Shortcuts] 保存当前分组')
     saveCurrentGroup()
@@ -283,7 +283,7 @@ function handleKeyboard(e) {
   }
 
   // Ctrl+Shift+U 上传到云端
-  if (e.ctrlKey && e.shiftKey && e.key === 'U') {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'U') {
     if (!configStore.get('shortcuts', 'cloudUpload')) return
     console.log('[Shortcuts] 上传到云端')
     cloudUpload()
@@ -292,7 +292,7 @@ function handleKeyboard(e) {
   }
 
   // Ctrl+Shift+D 从云端下载
-  if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
     if (!configStore.get('shortcuts', 'cloudDownload')) return
     console.log('[Shortcuts] 从云端下载')
     cloudDownload()

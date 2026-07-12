@@ -544,7 +544,7 @@ const resetForm = () => {
 
 .key-textarea {
   min-height: 140px;
-  font-family: 'Courier New', Consolas, monospace;
+  font-family: 'SF Mono', Menlo, Monaco, 'Courier New', Consolas, monospace;
   font-size: 0.75rem;
   line-height: 1.6;
   resize: vertical;

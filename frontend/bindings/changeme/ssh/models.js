@@ -6,10 +6,6 @@
 // @ts-ignore: Unused imports
 import { Create as $Create } from "@wailsio/runtime";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
-import * as time$0 from "../../time/models.js";
-
 /**
  * AIConfig AI 配置（预留）
  */
@@ -676,9 +672,9 @@ export class FileInfo {
         if (!("modTime" in $$source)) {
             /**
              * @member
-             * @type {time$0.Time}
+             * @type {string}
              */
-            this["modTime"] = null;
+            this["modTime"] = "0001-01-01T00:00:00.000Z";
         }
         if (!("isDir" in $$source)) {
             /**

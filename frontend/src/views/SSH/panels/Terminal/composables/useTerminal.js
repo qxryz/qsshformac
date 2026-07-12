@@ -38,7 +38,7 @@ const DEFAULT_THEME = {
 export function useTerminal(containerRef, options = {}) {
   const {
     fontSize = 14,
-    fontFamily = '"Cascadia Code", "Fira Code", JetBrains Mono, Consolas, monospace',
+    fontFamily = '"SF Mono", Menlo, Monaco, "Cascadia Code", "Fira Code", JetBrains Mono, Consolas, monospace',
     theme = DEFAULT_THEME,
     cursorBlink = true,
     scrollback = 10000

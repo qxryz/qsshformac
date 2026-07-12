@@ -540,7 +540,7 @@ function initXterm() {
   const fontSize = cfg.get('terminal', 'fontSize') || 14
   xterm = new Terminal({
     fontSize,
-    fontFamily: '"Cascadia Code","Fira Code",Consolas,monospace',
+    fontFamily: '"SF Mono",Menlo,Monaco,"Cascadia Code","Fira Code",Consolas,monospace',
     theme: getXtermTheme(),
     cursorBlink: true,
     scrollback: 10000
@@ -555,12 +555,28 @@ function initXterm() {
   fitAddon.fit()
 
   // 拦截快捷键：Ctrl+C 复制 / Ctrl+V 粘贴 / Ctrl+←/→ 让 document 层处理
+  // macOS: Cmd+C 复制 / Cmd+V 粘贴（Ctrl+C 始终作为中断信号，符合 Unix 习惯）
   xterm.attachCustomKeyEventHandler((e) => {
-    if (e.ctrlKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
       return false // 阻止 xterm 处理，让事件冒泡到 document
     }
+    // Cmd+C (macOS): 有选区时复制
+    if (e.metaKey && e.key === 'c' && !e.altKey && !e.shiftKey && !e.ctrlKey) {
+      if (xterm.hasSelection()) {
+        navigator.clipboard.writeText(xterm.getSelection()).catch(() => {})
+        xterm.clearSelection()
+      }
+      return false
+    }
+    // Cmd+V (macOS): 粘贴剪贴板内容
+    if (e.metaKey && e.key === 'v' && !e.altKey && !e.shiftKey && !e.ctrlKey) {
+      navigator.clipboard.readText().then(text => {
+        if (text) send(text)
+      }).catch(() => {})
+      return false
+    }
     // Ctrl+C: 有选区时复制，不发送中断
-    if (e.ctrlKey && e.key === 'c' && !e.altKey && !e.shiftKey) {
+    if (e.ctrlKey && e.key === 'c' && !e.altKey && !e.shiftKey && !e.metaKey) {
       if (xterm.hasSelection()) {
         navigator.clipboard.writeText(xterm.getSelection()).catch(() => {})
         xterm.clearSelection()
@@ -570,7 +586,7 @@ function initXterm() {
       return true
     }
     // Ctrl+V: 粘贴剪贴板内容
-    if (e.ctrlKey && e.key === 'v' && !e.altKey && !e.shiftKey) {
+    if (e.ctrlKey && e.key === 'v' && !e.altKey && !e.shiftKey && !e.metaKey) {
       navigator.clipboard.readText().then(text => {
         if (text) send(text)
       }).catch(() => {})
@@ -820,6 +836,27 @@ function onKey(e) {
   // 补全弹窗导航
   if (showCompletion.value && completionRef.value?.handleKey(e.key)) { e.preventDefault(); return }
 
+  // ========== macOS: Cmd+C 复制 / Cmd+V 粘贴 ==========
+  if (e.metaKey && e.key === 'c' && !e.ctrlKey) {
+    const sel = window.getSelection()
+    if (sel && sel.toString().length > 0) {
+      e.preventDefault()
+      navigator.clipboard.writeText(sel.toString()).catch(() => {})
+      sel.removeAllRanges()
+    }
+    return
+  }
+  if (e.metaKey && e.key === 'v' && !e.ctrlKey) {
+    e.preventDefault()
+    navigator.clipboard.readText().then(text => {
+      if (text) {
+        cmd.value += text
+        inpRef.value?.focus()
+      }
+    }).catch(() => {})
+    return
+  }
+
   // ========== 交互式快捷键（需要 shell 交互） ==========
   const interactiveKeys = {
     'r': { code: '\x12', name: 'Ctrl+R (反向搜索)' },
@@ -893,7 +930,7 @@ function onKey(e) {
   if (e.ctrlKey && e.key === 'q') { e.preventDefault(); send('\x11'); return }
   if (e.ctrlKey && e.key === 'd') { e.preventDefault(); send('\x04'); return }
   if (e.ctrlKey && e.key === 'g') { e.preventDefault(); send('\x07'); return }
-  if (e.ctrlKey && e.key === 'f') { e.preventDefault(); openSearch(); return }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault(); openSearch(); return }
 
   // ========== Readline 编辑（本地 + 转发） ==========
   // 光标移动
@@ -1016,10 +1053,34 @@ function onKeyButton(e) {
   // 补全弹窗导航
   if (showCompletion.value && completionRef.value?.handleKey(e.key)) { e.preventDefault(); return }
 
-  // Ctrl+Enter: 发送命令
-  if (e.ctrlKey && e.key === 'Enter') {
+  // Ctrl+Enter / Cmd+Enter: 发送命令
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
     e.preventDefault()
     exec()
+    return
+  }
+
+  // Cmd+C (macOS): 复制选区
+  if (e.metaKey && e.key === 'c' && !e.ctrlKey) {
+    const sel = window.getSelection()
+    if (sel && sel.toString().length > 0) {
+      e.preventDefault()
+      navigator.clipboard.writeText(sel.toString()).catch(() => {})
+      sel.removeAllRanges()
+    }
+    return
+  }
+
+  // Cmd+V (macOS): 粘贴
+  if (e.metaKey && e.key === 'v' && !e.ctrlKey) {
+    e.preventDefault()
+    navigator.clipboard.readText().then(text => {
+      if (text) {
+        cmd.value += text
+        inpRef.value?.focus()
+        nextTick(() => autoResizeTextarea())
+      }
+    }).catch(() => {})
     return
   }
 
@@ -1238,10 +1299,10 @@ async function send(data) {
   try { await SSHService.WriteToTerminalByID(connId, sessionId, data) } catch {}
 }
 
-// 全局键盘处理（Ctrl+F 搜索，无论焦点在哪里）
+// 全局键盘处理（Ctrl+F / Cmd+F 搜索，无论焦点在哪里）
 function onGlobalKey(e) {
   if (disposed) return
-  if (e.ctrlKey && e.key === 'f') {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
     e.preventDefault()
     openSearch()
   }

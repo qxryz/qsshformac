@@ -620,8 +620,8 @@ onUnmounted(() => {
 .bcontent :deep(.cb) { margin:8px 0; border-radius:6px; overflow:hidden; background:var(--bg-panel-solid); border:1px solid var(--border-subtle) }
 .bcontent :deep(.cb-h) { display:flex; align-items:center; justify-content:space-between; font-size:10px; color:var(--text-muted); padding:4px 10px; background:var(--surface-1); border-bottom:1px solid var(--border-subtle); text-transform:uppercase; font-family:monospace }
 .bcontent :deep(pre) { margin:0; padding:10px; overflow-x:auto; background:transparent }
-.bcontent :deep(pre code) { font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:12px; line-height:1.5 }
-.bcontent :deep(code) { font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:12px }
+.bcontent :deep(pre code) { font-family:'SF Mono',Menlo,Monaco,'Cascadia Code','Fira Code',Consolas,monospace; font-size:12px; line-height:1.5 }
+.bcontent :deep(code) { font-family:'SF Mono',Menlo,Monaco,'Cascadia Code','Fira Code',Consolas,monospace; font-size:12px }
 .bcontent :deep(.inline-code) { background:var(--shadow-sm); padding:1px 5px; border-radius:3px; font-size:.9em }
 
 /* 工具结果 */

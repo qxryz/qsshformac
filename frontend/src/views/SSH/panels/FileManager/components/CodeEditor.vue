@@ -287,7 +287,7 @@ onUnmounted(() => {
 :deep(.cm-editor) {
   height: 100%;
   font-size: 14px;
-  font-family: 'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace;
+  font-family: 'SF Mono', Menlo, Monaco, 'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace;
 }
 
 :deep(.cm-scroller) {

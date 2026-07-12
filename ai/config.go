@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"changeme/apppaths"
 )
 
 // AIConfig AI配置结构（OpenAI 兼容格式）
@@ -99,36 +101,9 @@ func getDefaultConfig() *AIConfig {
 }
 
 // getDataDir 获取数据目录路径
+// macOS: ~/Library/Application Support/qssh（开发模式下为 ./bin/data 或 ./data）
 func getDataDir() string {
-	// 优先使用当前工作目录（dev 模式下 os.Executable 指向临时目录）
-	cwd, err := os.Getwd()
-	if err == nil {
-		// 检查 bin/data 是否存在（项目结构）
-		binData := filepath.Join(cwd, "bin", "data")
-		if _, statErr := os.Stat(binData); statErr == nil {
-			return binData
-		}
-		// 检查 data 是否存在
-		data := filepath.Join(cwd, "data")
-		if _, statErr := os.Stat(data); statErr == nil {
-			return data
-		}
-	}
-
-	// 回退：可执行文件所在目录
-	exePath, err := os.Executable()
-	if err != nil {
-		exePath = "."
-	}
-	exeDir := filepath.Dir(exePath)
-	dataDir := filepath.Join(exeDir, "data")
-
-	// 确保data目录存在
-	if err := os.MkdirAll(dataDir, 0755); err != nil {
-		fmt.Printf("[AI Config] 创建data目录失败: %v\n", err)
-	}
-
-	return dataDir
+	return apppaths.DataDir()
 }
 
 // loadConfig 从文件加载配置
