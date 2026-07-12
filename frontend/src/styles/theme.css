@@ -275,3 +275,65 @@ body {
 .no-theme-transition * {
   transition: none !important;
 }
+
+/* ===== macOS 风格全局 tooltip（配合 utils/tooltip.js） ===== */
+.mac-tooltip {
+  position: fixed;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 9px;
+  max-width: 320px;
+  background: var(--bg-tooltip);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-2px) scale(0.98);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+}
+
+.mac-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.mac-tooltip-keys {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+/* ===== macOS 系统字体基线 ===== */
+html, body, #app {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC',
+    'Helvetica Neue', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* macOS: 禁止整体页面的橡皮筋滚动误触 */
+html, body {
+  overscroll-behavior: none;
+}
+
+/* macOS: 界面元素默认不可选中文字（终端/输入区除外，由组件自行开启） */
+button, .mac-tooltip {
+  -webkit-user-select: none;
+  user-select: none;
+}

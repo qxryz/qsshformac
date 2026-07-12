@@ -6,12 +6,16 @@ import './styles/theme.css'
 import { useConfigStore } from './stores/config'
 import { Events } from '@wailsio/runtime'
 import * as CloudService from '@bindings/changeme/ssh/cloudservice.js'
+import { initTooltip } from './utils/tooltip'
 
 const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
+
+// macOS 风格 tooltip（接管所有 title / data-tip）
+initTooltip()
 
 // 初始化配置
 const configStore = useConfigStore()

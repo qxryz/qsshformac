@@ -34,7 +34,7 @@
             v-if="!editable && type === 'text'" 
             @click="$emit('enable-edit')" 
             class="toolbar-btn"
-            title="编辑 (Ctrl+E)"
+            data-tip="编辑|⌘E"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -48,7 +48,7 @@
             @click="handleSave" 
             class="toolbar-btn primary"
             :disabled="saving"
-            title="保存 (Ctrl+S)"
+            data-tip="保存|⌘S"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
@@ -59,7 +59,7 @@
           </button>
           
           <!-- 关闭按钮 -->
-          <button @click="$emit('close')" class="close-btn" title="关闭 (Esc)">
+          <button @click="$emit('close')" class="close-btn" data-tip="关闭|Esc">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>

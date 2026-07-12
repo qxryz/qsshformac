@@ -26,7 +26,7 @@
         class="toolbar-btn"
         :class="{ recording: isRecording, paused: isRecording && isPaused }"
         @click="toggleRecording"
-        :title="isRecording ? '停止录制' : '开始录制'"
+        :data-tip="isRecording ? '停止录制' : '开始录制'"
       >
         <svg v-if="!isRecording" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
           <circle cx="12" cy="12" r="8"/>
@@ -48,7 +48,7 @@
         v-if="isRecording || hasRecording"
         class="toolbar-btn"
         @click="showSaveMenu = !showSaveMenu"
-        title="保存录制"
+        data-tip="保存录制"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -68,7 +68,7 @@
     <!-- 右侧：功能按钮 -->
     <div class="toolbar-right">
       <!-- 搜索 -->
-      <button class="toolbar-btn" @click="$emit('search')" title="搜索">
+      <button class="toolbar-btn" @click="$emit('search')" data-tip="搜索|⌘F">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/>
           <line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -76,7 +76,7 @@
       </button>
 
       <!-- 命令历史 -->
-      <button class="toolbar-btn" @click="$emit('open-command-history')" title="命令历史">
+      <button class="toolbar-btn" @click="$emit('open-command-history')" data-tip="命令历史">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"/>
           <polyline points="12 6 12 12 16 14"/>
@@ -84,7 +84,7 @@
       </button>
 
       <!-- 会话管理 -->
-      <button class="toolbar-btn" @click="$emit('open-session-manager')" title="会话管理">
+      <button class="toolbar-btn" @click="$emit('open-session-manager')" data-tip="会话管理">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="7" height="7"/>
           <rect x="14" y="3" width="7" height="7"/>
@@ -98,7 +98,7 @@
         v-if="connectionStatus === 'disconnected'"
         class="toolbar-btn reconnect"
         @click="$emit('reconnect')"
-        title="重新连接"
+        data-tip="重新连接"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M23 4v6h-6"/>

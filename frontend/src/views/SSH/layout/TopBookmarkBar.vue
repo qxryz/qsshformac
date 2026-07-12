@@ -1,6 +1,27 @@
 <template>
   <header class="top-bar">
-    <!-- 左侧：SSH 连接标签页 -->
+    <!-- 左侧：macOS 红绿灯窗口控制 -->
+    <div class="traffic-lights" @mouseenter="lightsHover = true" @mouseleave="lightsHover = false">
+      <button class="light close" data-tip="关闭本组窗口" @click="handleClose">
+        <svg v-if="lightsHover" width="8" height="8" viewBox="0 0 8 8">
+          <line x1="1.5" y1="1.5" x2="6.5" y2="6.5" stroke="rgba(77,0,0,0.85)" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="6.5" y1="1.5" x2="1.5" y2="6.5" stroke="rgba(77,0,0,0.85)" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button class="light minimize" data-tip="最小化|⌘M" @click="Window.Minimise()">
+        <svg v-if="lightsHover" width="8" height="8" viewBox="0 0 8 8">
+          <line x1="1" y1="4" x2="7" y2="4" stroke="rgba(120,70,0,0.85)" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button class="light zoom" :data-tip="isMaximised ? '恢复大小' : '缩放'" @click="toggleMaximise">
+        <svg v-if="lightsHover" width="8" height="8" viewBox="0 0 8 8">
+          <path d="M1.5 4.5 L1.5 6.5 L3.5 6.5 Z" fill="rgba(0,80,0,0.85)"/>
+          <path d="M6.5 3.5 L6.5 1.5 L4.5 1.5 Z" fill="rgba(0,80,0,0.85)"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- SSH 连接标签页 -->
     <div class="tab-container">
       <div
         v-for="tab in tabs"
@@ -12,20 +33,20 @@
         @dragstart="handleDragStart($event, tab)"
       >
         <span class="tab-status" :class="tab.status"></span>
-        <span class="tab-name" :title="'ID: ' + tab.id">{{ getTabDisplayName(tab) }}</span>
+        <span class="tab-name" :data-tip="'切换到此连接（⌘+←/→ 快速切换）'">{{ getTabDisplayName(tab) }}</span>
         <!-- 重连按钮（仅断线时显示） -->
         <button
           v-if="tab.status === 'disconnected'"
           class="tab-reconnect"
           @click.stop="reconnectTab(tab.id)"
-          title="重新连接"
+          data-tip="重新连接"
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M23 4v6h-6"/>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
           </svg>
         </button>
-        <button class="tab-close" @click.stop="closeTab(tab.id)">
+        <button class="tab-close" data-tip="关闭连接" @click.stop="closeTab(tab.id)">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
@@ -33,31 +54,7 @@
         </button>
       </div>
     </div>
-    
-    <!-- 右侧窗口控制按钮 -->
-    <div class="window-controls">
-      <button class="control-btn minimize" title="最小化" @click="Window.Minimise()">
-        <svg width="12" height="12" viewBox="0 0 12 12">
-          <line x1="0" y1="6" x2="12" y2="6" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
-      </button>
-      <button class="control-btn maximize" :title="isMaximised ? '恢复' : '最大化'" @click="toggleMaximise">
-        <svg v-if="!isMaximised" width="12" height="12" viewBox="0 0 12 12">
-          <rect x="1" y="1" width="10" height="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
-        </svg>
-        <svg v-else width="12" height="12" viewBox="0 0 12 12">
-          <rect x="3" y="1" width="8" height="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
-          <rect x="1" y="3" width="8" height="8" stroke="currentColor" stroke-width="1.5" fill="white"/>
-        </svg>
-      </button>
-      <button class="control-btn close" title="关闭本组" @click="handleClose">
-        <svg width="12" height="12" viewBox="0 0 12 12">
-          <line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
-      </button>
-    </div>
-    
+
     <!-- 关闭标签确认对话框 -->
     <Modal
       :visible="showCloseTabModal"
@@ -109,6 +106,7 @@ const { tabs, activeTabId } = storeToRefs(tabsStore)
 // 从路由参数获取 groupID
 const groupID = computed(() => route.query.group || '')
 const isMaximised = ref(false)
+const lightsHover = ref(false)
 
 // 断线状态映射
 const disconnectedTabs = ref(new Set())
@@ -642,39 +640,37 @@ onUnmounted(() => {
   color: var(--accent-danger);
 }
 
-/* 窗口控制按钮 */
-.window-controls {
+/* ===== macOS 红绿灯 ===== */
+.traffic-lights {
   display: flex;
+  gap: 8px;
   align-items: center;
-  gap: 0.25rem;
-  margin-left: 0.5rem;
-  padding-left: 0.5rem;
-  border-left: 0.0625rem solid var(--surface-hover);
+  padding: 0 0.75rem 0 0.5rem;
+  flex-shrink: 0;
+  --wails-draggable: no-drag;
+  -webkit-app-region: no-drag;
 }
 
-.control-btn {
+.light {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 0.5px solid rgba(0, 0, 0, 0.2);
+  padding: 0;
+  cursor: default;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  background: transparent;
-  border: none;
-  border-radius: 0.5rem;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s;
+  transition: filter 0.15s ease;
 }
 
-.control-btn:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
-}
+.light svg { display: block; }
 
-.control-btn.close:hover {
-  background: rgba(229, 62, 62, 0.2);
-  color: var(--accent-danger);
-}
+.light.close    { background: #ff5f57; }
+.light.minimize { background: #febc2e; }
+.light.zoom     { background: #28c840; }
+
+.light:active { filter: brightness(0.8); }
 
 /* 滚动条样式 */
 .tab-container::-webkit-scrollbar {

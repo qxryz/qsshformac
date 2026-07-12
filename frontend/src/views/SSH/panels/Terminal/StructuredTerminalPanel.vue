@@ -9,21 +9,21 @@
       </div>
       <div class="tb-c">
         <!-- 录制按钮 -->
-        <button class="tbb" :class="{ recording: isRecording }" @click="toggleRecording" :title="isRecording ? '停止录制' : '开始录制'">
+        <button class="tbb" :class="{ recording: isRecording }" @click="toggleRecording" :data-tip="isRecording ? '停止录制' : '开始录制'">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
             <circle v-if="!isRecording" cx="12" cy="12" r="8"/>
             <rect v-else x="6" y="6" width="12" height="12" rx="2"/>
           </svg>
         </button>
         <!-- 命令历史 -->
-        <button class="tbb" @click="showHistory=!showHistory" title="命令历史">
+        <button class="tbb" @click="showHistory=!showHistory" data-tip="命令历史">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
           </svg>
         </button>
         <!-- 清空 -->
-        <button class="tbb" @click="clearAll" title="清空">
+        <button class="tbb" @click="clearAll" data-tip="清空终端|⌃L">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="3 6 5 6 21 6"/>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -33,7 +33,7 @@
       <div class="tb-r">
         <span class="sep"></span>
         <!-- 结构化模式 -->
-        <button class="tbb vw" :class="{a: view==='block'}" @click="switchView('block')" title="结构化视图">
+        <button class="tbb vw" :class="{a: view==='block'}" @click="switchView('block')" data-tip="结构化视图（命令分块展示）">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="3" width="7" height="7"/>
             <rect x="14" y="3" width="7" height="7"/>
@@ -41,7 +41,7 @@
           </svg>
         </button>
         <!-- 经典模式 -->
-        <button class="tbb vw" :class="{a: view==='classic'}" @click="switchView('classic')" title="经典终端">
+        <button class="tbb vw" :class="{a: view==='classic'}" @click="switchView('classic')" data-tip="经典终端（原生 xterm）">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="4 17 10 11 4 5"/>
             <line x1="12" y1="19" x2="20" y2="19"/>
@@ -60,14 +60,14 @@
           @re-execute="reExec(b.id)" :plain-text="true" />
       </div>
       <div class="shortcut-bar">
-        <span class="shortcut"><kbd>Tab</kbd> 补全</span>
-        <span class="shortcut"><kbd>Ctrl+C</kbd> 中断</span>
-        <span class="shortcut"><kbd>Ctrl+L</kbd> 清屏</span>
-        <span class="shortcut"><kbd>Ctrl+R</kbd> 搜索</span>
-        <span class="shortcut"><kbd>Ctrl+Z</kbd> 暂停</span>
-        <span class="shortcut"><kbd>↑↓</kbd> 历史</span>
+        <span class="shortcut" data-tip="自动补全命令或路径"><kbd>⇥</kbd> 补全</span>
+        <span class="shortcut" data-tip="中断当前命令 (SIGINT)"><kbd>⌃C</kbd> 中断</span>
+        <span class="shortcut" data-tip="清空屏幕"><kbd>⌃L</kbd> 清屏</span>
+        <span class="shortcut" data-tip="反向搜索历史命令"><kbd>⌃R</kbd> 搜索</span>
+        <span class="shortcut" data-tip="暂停当前进程 (SIGTSTP)"><kbd>⌃Z</kbd> 暂停</span>
+        <span class="shortcut" data-tip="浏览历史命令"><kbd>↑↓</kbd> 历史</span>
         <span class="sep"></span>
-        <span class="shortcut app"><kbd>Ctrl+O</kbd> 临时终端</span>
+        <span class="shortcut app" data-tip="打开内嵌临时终端"><kbd>⌃O</kbd> 临时终端</span>
         <button class="shortcut-more" @click="showShortcuts = true">更多...</button>
       </div>
       <div class="inp" ref="inpAreaRef">
@@ -77,10 +77,10 @@
             placeholder="输入命令" :disabled="status!=='active'"
             @keydown="onKey" @input="onInput" />
           <textarea v-else ref="inpRef" v-model="cmd" class="ci ci-textarea"
-            placeholder="输入命令（Enter 换行，Ctrl+Enter 或点击发送）" :disabled="status!=='active'"
+            placeholder="输入命令（Enter 换行，⌘+Enter 或点击发送）" :disabled="status!=='active'"
             @keydown="onKeyButton" @input="onInputButton" rows="1"></textarea>
         </div>
-        <button v-if="commandSendMode === 'button'" class="send-btn" @click="exec" :disabled="!cmd.trim() || status !== 'active'" title="发送命令">
+        <button v-if="commandSendMode === 'button'" class="send-btn" @click="exec" :disabled="!cmd.trim() || status !== 'active'" data-tip="发送命令|⌘↩">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="22" y1="2" x2="11" y2="13"/>
             <polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -124,17 +124,17 @@
           <span class="search-count" v-if="searchResults.length > 0">
             {{ searchIndex + 1 }}/{{ searchResults.length }}
           </span>
-          <button class="search-btn" @click="searchPrev" title="上一个">
+          <button class="search-btn" @click="searchPrev" data-tip="上一个|⇧↩">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="18 15 12 9 6 15"/>
             </svg>
           </button>
-          <button class="search-btn" @click="searchNext" title="下一个">
+          <button class="search-btn" @click="searchNext" data-tip="下一个|↩">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="6 9 12 15 18 9"/>
             </svg>
           </button>
-          <button class="search-btn close" @click="showSearch = false" title="关闭">
+          <button class="search-btn close" @click="showSearch = false" data-tip="关闭|Esc">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/>
               <line x1="6" y1="6" x2="18" y2="18"/>
