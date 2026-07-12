@@ -172,12 +172,7 @@ func (s *ProcessGuardianService) CreateGuardian(connID, name, command, workDir s
 	}
 
 	// 清理名称（只允许字母数字和连字符）
-	safeName := strings.Map(func(r rune) rune {
-		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '-' || r == '_' {
-			return r
-		}
-		return '-'
-	}, name)
+	safeName := sanitizeName(name)
 
 	if workDir == "" {
 		workDir = "/tmp"
@@ -228,30 +223,47 @@ WantedBy=multi-user.target
 	return nil
 }
 
+// sanitizeName 清理守护进程名称（只允许字母数字、连字符、下划线），
+// 用于所有生命周期方法，防止命令注入。
+func sanitizeName(name string) string {
+	return strings.Map(func(r rune) rune {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '-' || r == '_' {
+			return r
+		}
+		return '-'
+	}, name)
+}
+
+// safeUnitName 返回经过清理的 systemd 单元名。
+func safeUnitName(name string) string {
+	return fmt.Sprintf("pzssh-%s.service", sanitizeName(name))
+}
+
 // StartGuardian 启动守护进程
 func (s *ProcessGuardianService) StartGuardian(connID, name string) error {
-	unitName := fmt.Sprintf("pzssh-%s.service", name)
+	unitName := safeUnitName(name)
 	_, err := s.runCmd(connID, fmt.Sprintf("systemctl start %s", unitName))
 	return err
 }
 
 // StopGuardian 停止守护进程
 func (s *ProcessGuardianService) StopGuardian(connID, name string) error {
-	unitName := fmt.Sprintf("pzssh-%s.service", name)
+	unitName := safeUnitName(name)
 	_, err := s.runCmd(connID, fmt.Sprintf("systemctl stop %s", unitName))
 	return err
 }
 
 // RestartGuardian 重启守护进程
 func (s *ProcessGuardianService) RestartGuardian(connID, name string) error {
-	unitName := fmt.Sprintf("pzssh-%s.service", name)
+	unitName := safeUnitName(name)
 	_, err := s.runCmd(connID, fmt.Sprintf("systemctl restart %s", unitName))
 	return err
 }
 
 // DeleteGuardian 删除守护进程
 func (s *ProcessGuardianService) DeleteGuardian(connID, name string) error {
-	unitName := fmt.Sprintf("pzssh-%s.service", name)
+	safe := sanitizeName(name)
+	unitName := fmt.Sprintf("pzssh-%s.service", safe)
 	servicePath := fmt.Sprintf("/etc/systemd/system/%s", unitName)
 
 	// 停止并禁用
@@ -260,7 +272,7 @@ func (s *ProcessGuardianService) DeleteGuardian(connID, name string) error {
 
 	// 删除文件
 	s.runCmd(connID, fmt.Sprintf("rm -f %s", servicePath))
-	s.runCmd(connID, fmt.Sprintf("rm -f /var/log/pzssh-%s.log", name))
+	s.runCmd(connID, fmt.Sprintf("rm -f /var/log/pzssh-%s.log", safe))
 
 	// 重载
 	s.runCmd(connID, "systemctl daemon-reload")
@@ -273,14 +285,14 @@ func (s *ProcessGuardianService) GetGuardianLogs(connID, name string, lines int)
 	if lines <= 0 {
 		lines = 100
 	}
-	unitName := fmt.Sprintf("pzssh-%s.service", name)
+	unitName := safeUnitName(name)
 	out, _ := s.runCmd(connID, fmt.Sprintf("journalctl -u %s -n %d --no-pager -o short-iso 2>/dev/null", unitName, lines))
 	return out
 }
 
 // GetGuardianStats 获取守护进程统计
 func (s *ProcessGuardianService) GetGuardianStats(connID, name string) map[string]interface{} {
-	unitName := fmt.Sprintf("pzssh-%s.service", name)
+	unitName := safeUnitName(name)
 
 	status := s.getSystemdStatus(connID, unitName)
 	pid := s.getSystemdPID(connID, unitName)
@@ -311,7 +323,7 @@ func (s *ProcessGuardianService) GetGuardianStats(connID, name string) map[strin
 
 // ClearGuardianLogs 清空守护进程日志（清空 systemd journal 中该服务的记录）
 func (s *ProcessGuardianService) ClearGuardianLogs(connID, name, logPath string) error {
-	unitName := fmt.Sprintf("pzssh-%s.service", name)
+	unitName := safeUnitName(name)
 
 	fmt.Printf("[Guardian] ClearGuardianLogs: name=%s, unit=%s\n", name, unitName)
 

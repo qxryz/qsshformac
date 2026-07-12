@@ -147,7 +147,7 @@ func (cm *ConfigManager) SaveConfig(config *AIConfig) error {
 	}
 
 	// 写入文件
-	if err := os.WriteFile(cm.dataPath, data, 0644); err != nil {
+	if err := apppaths.WriteSecure(cm.dataPath, data); err != nil {
 		return fmt.Errorf("写入配置文件失败: %v", err)
 	}
 

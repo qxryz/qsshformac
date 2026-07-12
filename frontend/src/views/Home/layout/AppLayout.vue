@@ -37,12 +37,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { Window } from '@wailsio/runtime'
 import { GetVersion } from '../../../../bindings/changeme/ssh/greetservice.js'
 
 const isMaximised = ref(false)
 const version = ref('0.2.0')
+let maximiseTimer = null
 
 onMounted(async () => {
   try {
@@ -71,7 +72,11 @@ onMounted(() => {
   updateMaximiseButton()
 
   // 定期检查窗口状态
-  setInterval(updateMaximiseButton, 500)
+  maximiseTimer = setInterval(updateMaximiseButton, 500)
+})
+
+onUnmounted(() => {
+  if (maximiseTimer) clearInterval(maximiseTimer)
 })
 </script>
 

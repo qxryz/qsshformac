@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
+
+	"changeme/apppaths"
 )
 
 // Project 代表一个 SSH 服务器项目
@@ -62,7 +64,7 @@ func NewChatStore(baseDir string) (*ChatStore, error) {
 		filepath.Join(store.baseDir, "history"),
 	}
 	for _, dir := range dirs {
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0700); err != nil {
 			return nil, fmt.Errorf("创建目录 %s 失败: %v", dir, err)
 		}
 	}
@@ -206,7 +208,7 @@ func (cs *ChatStore) SaveMessages(key string, messages []map[string]interface{})
 		return fmt.Errorf("序列化消息历史失败: %v", err)
 	}
 
-	return os.WriteFile(filePath, data, 0644)
+	return apppaths.WriteSecure(filePath, data)
 }
 
 // LoadMessages 加载完整消息历史
@@ -253,7 +255,7 @@ func (cs *ChatStore) saveProject(p *Project) {
 		fmt.Printf("[ChatStore] 序列化项目失败: %v\n", err)
 		return
 	}
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
+	if err := apppaths.WriteSecure(filePath, data); err != nil {
 		fmt.Printf("[ChatStore] 保存项目失败: %v\n", err)
 	}
 }
@@ -266,7 +268,7 @@ func (cs *ChatStore) saveSession(s *ChatSession) {
 		fmt.Printf("[ChatStore] 序列化会话失败: %v\n", err)
 		return
 	}
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
+	if err := apppaths.WriteSecure(filePath, data); err != nil {
 		fmt.Printf("[ChatStore] 保存会话失败: %v\n", err)
 	}
 }

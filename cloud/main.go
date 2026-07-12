@@ -40,7 +40,7 @@ func main() {
 			dir = filepath.Join(filepath.Dir(exePath), "data")
 		}
 	}
-	os.MkdirAll(dir, 0755)
+	os.MkdirAll(dir, 0700)
 
 	configPath := filepath.Join(dir, "config.json")
 	cfg := loadConfig(configPath)
@@ -203,5 +203,5 @@ func saveConfig(path string, cfg *server.Config) {
 	if err != nil {
 		return
 	}
-	os.WriteFile(path, data, 0644)
+	os.WriteFile(path, data, 0600)
 }

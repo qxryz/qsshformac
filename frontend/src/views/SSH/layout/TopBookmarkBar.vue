@@ -109,6 +109,7 @@ const { tabs, activeTabId } = storeToRefs(tabsStore)
 // 从路由参数获取 groupID
 const groupID = computed(() => route.query.group || '')
 const isMaximised = ref(false)
+let maximiseTimer = null
 
 // 断线状态映射
 const disconnectedTabs = ref(new Set())
@@ -395,7 +396,7 @@ async function cloudDownload() {
 
 onMounted(() => {
   updateMaximiseButton()
-  setInterval(updateMaximiseButton, 500)
+  maximiseTimer = setInterval(updateMaximiseButton, 500)
 
   // 注册快捷键监听
   document.addEventListener('keydown', handleKeyboard)
@@ -485,6 +486,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  // 清理定时器
+  if (maximiseTimer) clearInterval(maximiseTimer)
+
   // 清理快捷键监听
   document.removeEventListener('keydown', handleKeyboard)
 

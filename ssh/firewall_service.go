@@ -178,15 +178,37 @@ func (s *FirewallService) AddIptablesRule(connID, chain, target, protocol, port,
 		source = "0.0.0.0/0"
 	}
 
+	// 校验各字段，防止命令注入
+	var err error
+	if chain, err = oneOf("链", chain, "input", "output", "forward"); err != nil {
+		return err
+	}
+	chain = strings.ToUpper(chain)
+	if target, err = oneOf("动作", target, "accept", "drop", "reject"); err != nil {
+		return err
+	}
+	target = strings.ToUpper(target)
+	if protocol, err = oneOf("协议", protocol, "tcp", "udp", "icmp"); err != nil {
+		return err
+	}
+	if err = validCIDR(source); err != nil {
+		return err
+	}
+	if port != "" {
+		if err = validPort(port); err != nil {
+			return err
+		}
+	}
+
 	cmd := fmt.Sprintf("iptables -A %s -p %s -s %s -j %s", chain, protocol, source, target)
 	if port != "" {
 		cmd += fmt.Sprintf(" --dport %s", port)
 	}
 	if comment != "" {
-		cmd += fmt.Sprintf(" -m comment --comment '%s'", comment)
+		cmd += fmt.Sprintf(" -m comment --comment %s", shellQuote(comment))
 	}
 
-	_, err := s.runCmd(connID, cmd)
+	_, err = s.runCmd(connID, cmd)
 	if err != nil {
 		return fmt.Errorf("添加规则失败: %v", err)
 	}
@@ -200,8 +222,13 @@ func (s *FirewallService) DeleteIptablesRule(connID, chain string, index int) er
 	if chain == "" {
 		chain = "INPUT"
 	}
+	normChain, err := oneOf("链", chain, "input", "output", "forward")
+	if err != nil {
+		return err
+	}
+	chain = strings.ToUpper(normChain)
 	cmd := fmt.Sprintf("iptables -D %s %d", chain, index)
-	_, err := s.runCmd(connID, cmd)
+	_, err = s.runCmd(connID, cmd)
 	if err != nil {
 		return fmt.Errorf("删除规则失败: %v", err)
 	}
@@ -279,15 +306,31 @@ func (s *FirewallService) AddFirewalldRule(connID, zone, port, protocol string) 
 		protocol = "tcp"
 	}
 
+	// 校验，防止命令注入
+	if err := validIdentifier("zone", zone); err != nil {
+		return err
+	}
+	var err error
+	if protocol, err = oneOf("协议", protocol, "tcp", "udp"); err != nil {
+		return err
+	}
+
 	// 判断是端口还是服务
 	if strings.Contains(port, "/") || strings.Contains(port, ":") {
 		// 端口范围
+		if err := validPort(strings.SplitN(port, "/", 2)[0]); err != nil {
+			return err
+		}
 		cmd := fmt.Sprintf("firewall-cmd --zone=%s --add-port=%s/%s --permanent 2>/dev/null", zone, port, protocol)
 		_, err := s.runCmd(connID, cmd)
 		if err != nil {
 			return fmt.Errorf("添加端口规则失败: %v", err)
 		}
 	} else {
+		// 端口或服务名：两者都是标识符/数字，统一用标识符校验
+		if err := validIdentifier("端口或服务", port); err != nil {
+			return err
+		}
 		// 尝试作为服务添加
 		cmd := fmt.Sprintf("firewall-cmd --zone=%s --add-service=%s --permanent 2>/dev/null", zone, port)
 		_, err := s.runCmd(connID, cmd)
@@ -315,8 +358,20 @@ func (s *FirewallService) DeleteFirewalldRule(connID, zone, port, protocol strin
 		protocol = "tcp"
 	}
 
+	// 校验，防止命令注入
+	if err := validIdentifier("zone", zone); err != nil {
+		return err
+	}
+	var err error
+	if protocol, err = oneOf("协议", protocol, "tcp", "udp"); err != nil {
+		return err
+	}
+	if err = validIdentifier("端口或服务", strings.SplitN(port, "/", 2)[0]); err != nil {
+		return err
+	}
+
 	cmd := fmt.Sprintf("firewall-cmd --zone=%s --remove-port=%s/%s --permanent 2>/dev/null", zone, port, protocol)
-	_, err := s.runCmd(connID, cmd)
+	_, err = s.runCmd(connID, cmd)
 	if err != nil {
 		// 尝试作为服务删除
 		cmd = fmt.Sprintf("firewall-cmd --zone=%s --remove-service=%s --permanent 2>/dev/null", zone, port)
@@ -391,20 +446,33 @@ func (s *FirewallService) AddUfwRule(connID, action, port, protocol, source stri
 	if action == "" {
 		action = "allow"
 	}
-	action = strings.ToLower(action)
+	// 校验各字段，防止命令注入
+	action, err := oneOf("动作", action, "allow", "deny", "reject", "limit")
+	if err != nil {
+		return err
+	}
 
 	cmd := fmt.Sprintf("ufw %s", action)
 	if port != "" {
+		if err := validPort(port); err != nil {
+			return err
+		}
 		cmd += " " + port
 		if protocol != "" && protocol != "all" {
+			if protocol, err = oneOf("协议", protocol, "tcp", "udp"); err != nil {
+				return err
+			}
 			cmd += "/" + protocol
 		}
 	}
 	if source != "" && source != "anywhere" && source != "0.0.0.0/0" {
+		if err := validCIDR(source); err != nil {
+			return err
+		}
 		cmd += " from " + source
 	}
 
-	_, err := s.runCmd(connID, cmd)
+	_, err = s.runCmd(connID, cmd)
 	if err != nil {
 		return fmt.Errorf("添加规则失败: %v", err)
 	}

@@ -333,7 +333,7 @@ func (s *SSHClient) CancelSearch(searchID string) {
 // getFileOwner 获取文件所有者和组
 func (s *SSHClient) getFileOwner(path string) (string, string) {
 	// 使用 stat 命令代替 ls，更可靠
-	cmd := fmt.Sprintf("stat -c '%%U %%G' '%s'", path)
+	cmd := fmt.Sprintf("stat -c '%%U %%G' %s", shellQuote(path))
 	result, err := s.ExecuteCommand(cmd)
 	if err != nil || !result.Success {
 		fmt.Printf("[SFTP] ⚠️ 获取文件所有者失败: %v\n", err)
@@ -638,9 +638,9 @@ func (s *SSHClient) CreateArchive(files []string, archiveName string) (string, e
 	tempArchive := fmt.Sprintf("%s/%s.tar.gz", tempDir, archiveName)
 
 	// 构建 tar 命令（允许顶级目录存在）
-	cmd := fmt.Sprintf("tar czf '%s'", tempArchive)
+	cmd := fmt.Sprintf("tar czf %s", shellQuote(tempArchive))
 	for _, file := range files {
-		cmd += fmt.Sprintf(" '%s'", file)
+		cmd += " " + shellQuote(file)
 	}
 
 	fmt.Printf("[SFTP] 执行压缩命令: %s\n", cmd)
@@ -659,7 +659,7 @@ func (s *SSHClient) CreateArchive(files []string, archiveName string) (string, e
 
 // DeleteTempFile 删除临时文件
 func (s *SSHClient) DeleteTempFile(filePath string) error {
-	cmd := fmt.Sprintf("rm -f '%s'", filePath)
+	cmd := fmt.Sprintf("rm -f %s", shellQuote(filePath))
 	result, err := s.ExecuteCommand(cmd)
 	if err != nil {
 		return fmt.Errorf("删除临时文件失败: %v", err)
@@ -679,13 +679,13 @@ func (s *SSHClient) ExtractArchive(archivePath string, targetDir string) error {
 	var cmd string
 	if strings.HasSuffix(archivePath, ".zip") {
 		// 解压 zip 文件
-		cmd = fmt.Sprintf("cd '%s' && unzip -o '%s'", targetDir, archivePath)
+		cmd = fmt.Sprintf("cd %s && unzip -o %s", shellQuote(targetDir), shellQuote(archivePath))
 	} else if strings.HasSuffix(archivePath, ".tar.gz") || strings.HasSuffix(archivePath, ".tgz") {
 		// 解压 tar.gz 文件
-		cmd = fmt.Sprintf("cd '%s' && tar xzf '%s'", targetDir, archivePath)
+		cmd = fmt.Sprintf("cd %s && tar xzf %s", shellQuote(targetDir), shellQuote(archivePath))
 	} else if strings.HasSuffix(archivePath, ".tar") {
 		// 解压 tar 文件
-		cmd = fmt.Sprintf("cd '%s' && tar xf '%s'", targetDir, archivePath)
+		cmd = fmt.Sprintf("cd %s && tar xf %s", shellQuote(targetDir), shellQuote(archivePath))
 	} else {
 		return fmt.Errorf("不支持的压缩格式: %s", archivePath)
 	}

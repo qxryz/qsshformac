@@ -1,10 +1,15 @@
 package client
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -66,7 +71,11 @@ func (cc *CloudClient) Connect() error {
 	dialer := websocket.Dialer{
 		HandshakeTimeout: 10 * time.Second,
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
+			// 服务端使用自签名证书，无法走标准 CA 校验。
+			// 采用 TOFU（首次信任）证书固定：首次连接记录证书指纹，
+			// 之后必须匹配，防止中间人攻击。
+			InsecureSkipVerify:    true, // 由 VerifyConnection 接管校验
+			VerifyConnection:      cc.verifyPinnedCert,
 		},
 	}
 
@@ -81,6 +90,68 @@ func (cc *CloudClient) Connect() error {
 	cc.mu.Unlock()
 
 	return nil
+}
+
+// verifyPinnedCert 实现 TOFU 证书固定校验。
+func (cc *CloudClient) verifyPinnedCert(cs tls.ConnectionState) error {
+	if len(cs.PeerCertificates) == 0 {
+		return fmt.Errorf("服务端未提供证书")
+	}
+	sum := sha256.Sum256(cs.PeerCertificates[0].Raw)
+	fp := hex.EncodeToString(sum[:])
+
+	pinned, err := loadPinnedFingerprint(cc.serverAddr)
+	if err == nil && pinned != "" {
+		if pinned != fp {
+			return fmt.Errorf("证书指纹不匹配（可能存在中间人攻击）：期望 %s，实际 %s", pinned, fp)
+		}
+		return nil
+	}
+	// 首次连接：记录指纹
+	if err := savePinnedFingerprint(cc.serverAddr, fp); err != nil {
+		fmt.Printf("[CloudClient] ⚠️ 保存证书指纹失败: %v\n", err)
+	} else {
+		fmt.Printf("[CloudClient] 已固定服务端证书指纹: %s\n", fp)
+	}
+	return nil
+}
+
+// pinFilePath 返回证书指纹存储文件路径。
+func pinFilePath() string {
+	base, err := os.UserConfigDir()
+	if err != nil {
+		base = os.TempDir()
+	}
+	dir := filepath.Join(base, "qssh", "cloud")
+	os.MkdirAll(dir, 0700)
+	return filepath.Join(dir, "known_certs.json")
+}
+
+func loadPins() map[string]string {
+	pins := map[string]string{}
+	data, err := os.ReadFile(pinFilePath())
+	if err == nil {
+		json.Unmarshal(data, &pins)
+	}
+	return pins
+}
+
+func loadPinnedFingerprint(addr string) (string, error) {
+	pins := loadPins()
+	if fp, ok := pins[addr]; ok {
+		return fp, nil
+	}
+	return "", fmt.Errorf("未找到指纹")
+}
+
+func savePinnedFingerprint(addr, fp string) error {
+	pins := loadPins()
+	pins[addr] = fp
+	data, err := json.MarshalIndent(pins, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(pinFilePath(), data, 0600)
 }
 
 // Disconnect 断开连接
@@ -211,8 +282,11 @@ func (cc *CloudClient) PushSync(data SyncData) error {
 
 func generateNonce() string {
 	b := make([]byte, 16)
-	for i := range b {
-		b[i] = byte(time.Now().UnixNano() >> (8 * (i % 8)))
+	if _, err := rand.Read(b); err != nil {
+		// 极少发生；退化为时间派生，仅作兜底
+		for i := range b {
+			b[i] = byte(time.Now().UnixNano() >> (8 * (i % 8)))
+		}
 	}
 	return fmt.Sprintf("%x", b)
 }

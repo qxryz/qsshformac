@@ -425,7 +425,7 @@ func (s *Server) saveSyncData() {
 	if err != nil {
 		return
 	}
-	os.WriteFile(path, data, 0644)
+	os.WriteFile(path, data, 0600)
 }
 
 // generateID 生成唯一ID

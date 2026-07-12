@@ -3,8 +3,11 @@ package main
 import (
 	"changeme/ai"
 	"changeme/ssh"
+	"crypto/sha256"
 	"embed"
 	_ "embed"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -12,6 +15,16 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
+
+// hashJSON 返回任意值 JSON 序列化后的短哈希，用于状态变化检测。
+func hashJSON(v interface{}) string {
+	data, err := json.Marshal(v)
+	if err != nil {
+		return ""
+	}
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:8])
+}
 
 // Wails 使用 Go 的 `embed` 包将前端文件嵌入到二进制文件中。
 // frontend/dist 文件夹中的所有文件将被嵌入到二进制文件中，
@@ -31,10 +44,6 @@ const (
 )
 
 func init() {
-	// 注册一个自定义事件，其关联的数据类型为 string。
-	// 这不是必需的，但绑定生成器会拾取注册的事件，
-	// 并为它们提供强类型的 JS/TS API。
-	application.RegisterEvent[string]("time")
 	// ssh:connections-updated 和 ssh:group-updated 不注册具体类型，使用 map[string]interface{}
 }
 func main() {
@@ -216,58 +225,69 @@ func main() {
 
 	fmt.Println("[Main] 系统托盘已初始化")
 
-	// 创建一个 goroutine，每秒发射一个包含当前时间的事件。
-	// 前端可以监听此事件并相应地更新 UI。
+	// 创建一个 goroutine，每500ms广播SSH分组状态。
+	// 仅在状态变化时才发送事件，避免无变化时反复推送整份连接列表，
+	// 减少前端反序列化与重渲染压力。
 	go func() {
-		for {
-			now := time.Now().Format(time.RFC1123)
-			app.Event.Emit("time", now)
-			time.Sleep(time.Second)
-		}
-	}()
-
-	// 创建一个 goroutine，每500ms广播SSH分组状态
-	go func() {
+		lastGroupHash := make(map[string]string)
+		lastConnHash := ""
 		for {
 			time.Sleep(500 * time.Millisecond)
 
 			// 获取所有分组
 			groups := sshService.GetAllGroups()
+			seen := make(map[string]bool, len(groups))
 
-			// 为每个分组发送状态
+			// 为每个分组发送状态（仅在变化时）
 			for _, group := range groups {
-				// 获取完整的连接信息（包含名称）
+				seen[group.ID] = true
 				connInfos := sshService.GetGroupConnectionInfos(group.ID)
-
-				// 使用 map[string]interface{} 作为事件数据
+				h := hashJSON(connInfos)
+				if lastGroupHash[group.ID] == h {
+					continue // 无变化，跳过
+				}
+				lastGroupHash[group.ID] = h
 				app.Event.Emit("ssh:group-updated", map[string]interface{}{
 					"groupID":     group.ID,
 					"action":      "state-sync",
-					"connections": connInfos, // 发送完整连接信息
+					"connections": connInfos,
 				})
 			}
+			// 清理已消失分组的缓存
+			for gid := range lastGroupHash {
+				if !seen[gid] {
+					delete(lastGroupHash, gid)
+				}
+			}
 
-			// 广播全局连接状态（用于首页侧边栏）
+			// 广播全局连接状态（用于首页侧边栏），仅在变化时
 			allConnections := sshService.GetAllConnections()
-
-			// 确保connections不是nil，而是空数组
 			if allConnections == nil {
 				allConnections = []*ssh.ConnectionInfo{}
 			}
-
-			app.Event.Emit("ssh:connections-updated", map[string]interface{}{
-				"connections": allConnections,
-				"timestamp":   time.Now().UnixMilli(),
-			})
+			h := hashJSON(allConnections)
+			if h != lastConnHash {
+				lastConnHash = h
+				app.Event.Emit("ssh:connections-updated", map[string]interface{}{
+					"connections": allConnections,
+					"timestamp":   time.Now().UnixMilli(),
+				})
+			}
 		}
 	}()
 
-	// 创建一个 goroutine，定期读取所有 Shell session 的输出并发送到前端
+	// 创建一个 goroutine，定期读取所有 Shell session 的输出并发送到前端。
+	// 采用自适应轮询：有输出时保持 20ms 高频，空闲时逐步退避到 100ms，
+	// 降低无终端活动时的 CPU 占用，同时不影响活跃终端的响应速度。
 	go func() {
-		buf := make([]byte, 4096)
+		buf := make([]byte, 32*1024) // 32KB 缓冲，减少高吞吐时的分片与事件数
+		const minInterval = 20 * time.Millisecond
+		const maxInterval = 100 * time.Millisecond
+		interval := minInterval
 		for {
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(interval)
 
+			gotData := false
 			connIDs := sshService.GetConnectionList()
 			for _, connID := range connIDs {
 				sessionIDs := sshService.GetSessionIDs(connID)
@@ -280,6 +300,7 @@ func main() {
 						continue
 					}
 					if n > 0 {
+						gotData = true
 						app.Event.Emit("ssh:terminal-output", map[string]interface{}{
 							"connID":    connID,
 							"sessionID": sessionID,
@@ -287,6 +308,13 @@ func main() {
 						})
 					}
 				}
+			}
+
+			// 自适应：有数据则回到高频，空闲则退避
+			if gotData {
+				interval = minInterval
+			} else if interval < maxInterval {
+				interval += 20 * time.Millisecond
 			}
 		}
 	}()
@@ -333,9 +361,4 @@ func calculateWindowSize(app *application.App) (int, int) {
 	}
 
 	return 1200, 800
-}
-
-// readFromShell 从Shell读取数据（非阻塞）
-func readFromShell(sshService *ssh.SSHService, connID string, buf []byte) (int, error) {
-	return sshService.ReadFromShell(connID, buf)
 }

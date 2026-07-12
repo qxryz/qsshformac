@@ -25,4 +25,4 @@ bin/data/
 
 # Build artifacts
 build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
-build/linux/appimage/build
+build/linux/appimage/build/changeme

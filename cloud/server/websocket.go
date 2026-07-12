@@ -37,7 +37,12 @@ type Message struct {
 }
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
+	// 原生客户端不携带 Origin 头；浏览器跨站脚本会带上其页面 Origin。
+	// 仅放行无 Origin 的连接（原生 App），拒绝任意浏览器 Origin，
+	// 防止跨站 WebSocket 劫持（CSWSH）。
+	CheckOrigin: func(r *http.Request) bool {
+		return r.Header.Get("Origin") == ""
+	},
 }
 
 // NewWSServer 创建 WebSocket 服务器
@@ -108,6 +113,7 @@ func (ws *WSServer) handleWS(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("[WS] 新连接: %s\n", clientAddr)
 
 	var deviceID string
+	authed := false // 是否已通过 register 令牌认证
 
 	defer func() {
 		conn.Close()
@@ -149,15 +155,16 @@ func (ws *WSServer) handleWS(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Printf("[WS] 收到消息: type=%s from=%s\n", msg.Type, clientAddr)
 
-		resp := ws.processMessage(msg)
+		resp := ws.processMessage(msg, authed)
 
-		// 记录设备ID
+		// 记录设备ID，并标记该连接已认证
 		if msg.Type == "register" && resp.Type == "ok" {
 			var result map[string]interface{}
 			json.Unmarshal(resp.Payload, &result)
 			if id, ok := result["id"].(string); ok {
 				deviceID = id
 			}
+			authed = true
 		}
 
 		respData, _ := json.Marshal(resp)
@@ -165,8 +172,9 @@ func (ws *WSServer) handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// processMessage 处理消息
-func (ws *WSServer) processMessage(msg Message) Message {
+// processMessage 处理消息。authed 表示该连接是否已通过 register 令牌认证；
+// sync-pull / sync-push / heartbeat 必须在认证后才能调用，防止匿名读取/篡改凭据。
+func (ws *WSServer) processMessage(msg Message, authed bool) Message {
 	switch msg.Type {
 	case "register":
 		var req RegisterRequest
@@ -180,6 +188,9 @@ func (ws *WSServer) processMessage(msg Message) Message {
 		return okResponse(device)
 
 	case "heartbeat":
+		if !authed {
+			return errorResponse("unauthorized")
+		}
 		var req struct {
 			DeviceID string `json:"deviceId"`
 		}
@@ -188,10 +199,16 @@ func (ws *WSServer) processMessage(msg Message) Message {
 		return okResponse(nil)
 
 	case "sync-pull":
+		if !authed {
+			return errorResponse("unauthorized")
+		}
 		data := ws.srv.GetSyncData()
 		return okResponse(data)
 
 	case "sync-push":
+		if !authed {
+			return errorResponse("unauthorized")
+		}
 		var data SyncData
 		if err := json.Unmarshal(msg.Payload, &data); err != nil {
 			return errorResponse("invalid_payload")
@@ -252,7 +269,11 @@ func generateCertIfNeeded(certFile, keyFile string) error {
 	certOut.Close()
 
 	keyDER, _ := x509.MarshalECPrivateKey(key)
-	keyOut, _ := os.Create(keyFile)
+	// 私钥文件仅所有者可读写
+	keyOut, err := os.OpenFile(keyFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		return fmt.Errorf("创建私钥文件失败: %v", err)
+	}
 	pem.Encode(keyOut, &pem.Block{Type: "EC PRIVATE KEY", Bytes: keyDER})
 	keyOut.Close()
 

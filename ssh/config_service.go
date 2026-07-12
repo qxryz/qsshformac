@@ -173,7 +173,7 @@ func (s *ConfigService) loadAndMerge() error {
 
 	// 确保目录存在
 	dir := filepath.Dir(s.filePath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("创建配置目录失败: %v", err)
 	}
 
@@ -311,7 +311,7 @@ func mergeConfig(raw map[string]interface{}, defaults *AppConfig) *AppConfig {
 func (s *ConfigService) save() error {
 	// 确保目录存在
 	dir := filepath.Dir(s.filePath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0700); err != nil {
 		fmt.Printf("[ConfigService] 创建目录失败: %v\n", err)
 		return err
 	}
@@ -322,7 +322,7 @@ func (s *ConfigService) save() error {
 	}
 
 	fmt.Printf("[ConfigService] 保存配置到: %s\n", s.filePath)
-	return os.WriteFile(s.filePath, data, 0644)
+	return apppaths.WriteSecure(s.filePath, data)
 }
 
 // GetConfig 获取完整配置

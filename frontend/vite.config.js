@@ -12,14 +12,14 @@ export default defineConfig({
       "@bindings": path.resolve(__dirname, "bindings"),
     },
   },
-  optimizeDeps: {
-    exclude: ['monaco-editor'] // 不预构建 monaco-editor
-  },
   build: {
     rollupOptions: {
       output: {
         manualChunks: {
-          monaco: ['monaco-editor'] // 将 monaco-editor 单独分包
+          // 将大体积第三方库拆分为独立 chunk，减小主包体积、改善缓存
+          xterm: ['xterm', 'xterm-addon-fit', 'xterm-addon-search', 'xterm-addon-web-links'],
+          highlight: ['highlight.js'],
+          markdown: ['marked'],
         }
       }
     }

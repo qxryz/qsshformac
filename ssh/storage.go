@@ -100,7 +100,7 @@ func NewStorageManager() *StorageManager {
 	if err := os.RemoveAll(cacheDataDir); err != nil {
 		fmt.Printf("[StorageManager] 清空缓存目录失败: %v\n", err)
 	}
-	if err := os.MkdirAll(cacheDataDir, 0755); err != nil {
+	if err := os.MkdirAll(cacheDataDir, 0700); err != nil {
 		fmt.Printf("[StorageManager] 创建 cache 目录失败: %v\n", err)
 		cacheDataDir = apppaths.DataDir() // 降级到 data 目录
 	}
@@ -155,7 +155,7 @@ func (sm *StorageManager) SaveToPermanent() error {
 	}
 	fmt.Printf("[StorageManager] 序列化成功，数据大小: %d bytes\n", len(data))
 
-	if err := os.WriteFile(sm.permanentDataFile, data, 0644); err != nil {
+	if err := apppaths.WriteSecure(sm.permanentDataFile, data); err != nil {
 		return fmt.Errorf("写入永久连接数据失败: %v", err)
 	}
 	fmt.Printf("[StorageManager] 永久文件写入成功: %s\n", sm.permanentDataFile)
@@ -260,7 +260,7 @@ func (sm *StorageManager) saveConnections() error {
 	}
 	fmt.Printf("[StorageManager] 序列化成功，数据大小: %d bytes\n", len(data))
 
-	if err := os.WriteFile(sm.dataFile, data, 0644); err != nil {
+	if err := apppaths.WriteSecure(sm.dataFile, data); err != nil {
 		return fmt.Errorf("写入连接数据失败: %v", err)
 	}
 	fmt.Printf("[StorageManager] 文件写入成功: %s\n", sm.dataFile)
@@ -431,7 +431,7 @@ func (sm *StorageManager) removeFromPermanent(host string, port int, username st
 	if err != nil {
 		return
 	}
-	os.WriteFile(sm.permanentDataFile, data, 0644)
+	apppaths.WriteSecure(sm.permanentDataFile, data)
 	fmt.Printf("[StorageManager] 已从永久文件移除: %s\n", key)
 }
 
@@ -548,7 +548,7 @@ func (sm *StorageManager) saveToPermanentLocked() error {
 	if err != nil {
 		return fmt.Errorf("序列化永久连接数据失败: %v", err)
 	}
-	if err := os.WriteFile(sm.permanentDataFile, data, 0644); err != nil {
+	if err := apppaths.WriteSecure(sm.permanentDataFile, data); err != nil {
 		return fmt.Errorf("写入永久连接数据失败: %v", err)
 	}
 	fmt.Printf("[StorageManager] 永久文件写入成功: %s (%d个连接)\n", sm.permanentDataFile, len(existing))

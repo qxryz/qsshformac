@@ -142,15 +142,16 @@ func (s *SSHClient) Connect() error {
 		return fmt.Errorf("未提供认证方式（密码或密钥）")
 	}
 
+	addr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
+
 	sshConfig := &ssh.ClientConfig{
-		User:            s.config.Username,
-		Auth:            authMethods,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // 生产环境应使用严格的主机密钥验证
+		User: s.config.Username,
+		Auth: authMethods,
+		// TOFU 主机密钥校验：首次连接记录指纹，之后必须匹配，防止中间人攻击
+		HostKeyCallback: tofuHostKeyCallback(addr),
 		Timeout:         time.Duration(s.config.Timeout) * time.Second,
 	}
 
-	addr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
-	
 	start := time.Now()
 	client, err := ssh.Dial("tcp", addr, sshConfig)
 	if err != nil {

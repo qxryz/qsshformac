@@ -307,6 +307,11 @@ func (c *SSHClient) SendSignal(ctx context.Context, pid int32, signal string) er
 		return fmt.Errorf("SSH 未连接")
 	}
 
+	// 校验信号名，防止命令注入
+	if err := validSignal(signal); err != nil {
+		return err
+	}
+
 	// 执行 kill 命令发送信号
 	cmd := fmt.Sprintf("kill -%s %d", signal, pid)
 	result, err := c.ExecuteCommand(cmd)

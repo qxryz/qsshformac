@@ -49,7 +49,7 @@ func resolveDataDir() string {
 	// 标准位置：macOS 为 ~/Library/Application Support/qssh
 	if base, err := os.UserConfigDir(); err == nil {
 		dir := filepath.Join(base, appDirName)
-		if err := os.MkdirAll(dir, 0755); err == nil {
+		if err := os.MkdirAll(dir, 0700); err == nil {
 			return dir
 		}
 	}
@@ -57,7 +57,7 @@ func resolveDataDir() string {
 	// 降级：用户主目录下的隐藏目录
 	if home, err := os.UserHomeDir(); err == nil {
 		dir := filepath.Join(home, "."+appDirName)
-		if err := os.MkdirAll(dir, 0755); err == nil {
+		if err := os.MkdirAll(dir, 0700); err == nil {
 			return dir
 		}
 	}
@@ -65,13 +65,25 @@ func resolveDataDir() string {
 	// 最终降级：当前工作目录
 	cwd, _ := os.Getwd()
 	dir := filepath.Join(cwd, "data")
-	os.MkdirAll(dir, 0755)
+	os.MkdirAll(dir, 0700)
 	return dir
 }
 
 // SubDir 返回数据根目录下的子目录（保证存在）。
 func SubDir(parts ...string) string {
 	dir := filepath.Join(append([]string{DataDir()}, parts...)...)
-	os.MkdirAll(dir, 0755)
+	os.MkdirAll(dir, 0700)
 	return dir
 }
+
+// WriteSecure 以 0600 权限写入敏感文件（凭据、密钥、令牌等）。
+// 若文件已存在，额外 Chmod 收紧权限，确保旧版本遗留的宽松权限被修正。
+func WriteSecure(path string, data []byte) error {
+	if err := os.WriteFile(path, data, 0600); err != nil {
+		return err
+	}
+	// 修正可能已存在的宽松权限
+	os.Chmod(path, 0600)
+	return nil
+}
+
