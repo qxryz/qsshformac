@@ -1,4 +1,4 @@
-# 舟SSH（qssh for mac）
+# 舟SSH（qssh 0.3.2.1 for mac）
 
 舟SSH是一款面向 macOS 的中文 SSH 客户端，提供终端、SFTP、端口转发、服务器管理和 AI 辅助操作，并新增了面向外部工作机 Agent 的 SSH 密钥监管能力。
 
@@ -231,6 +231,31 @@ ssh-keygen -lf /root/.ssh/authorized_keys
 - 移除本地监管记录不会删除服务器公钥。
 - 撤销公钥只阻止后续新登录；已经建立的 SSH 会话可能仍需单独终止。
 - 防火墙、服务管理、AI 命令执行等功能会修改远端状态，请在操作前检查目标服务器和命令内容。
+
+## 例行修复
+安全加固 + 性能优化 + 死代码
+安全:
+- SSH 主机密钥改用 TOFU 校验（ssh/hostkey.go），替换 InsecureIgnoreHostKey，防中间人
+- 云端客户端启用 TOFU 证书固定（cloud/client），替换 InsecureSkipVerify
+- 云端服务器 sync-pull/push/heartbeat 增加令牌认证，堵住匿名拖库
+- WebSocket CheckOrigin 仅放行无 Origin 的原生客户端，防 CSWSH
+- 修复命令注入：新增 ssh/shellsafe.go，firewall/guardian/monitor/sftp 全部
+  改用白名单校验 + shellQuote 单引号转义
+- 凭据/密钥/配置文件权限收紧为 0600，目录 0700，新增 apppaths.WriteSecure
+  （对旧文件补 chmod）；云端 key.pem/sync.json/config.json 同步收紧
+- 云端 nonce 改用 crypto/rand，去掉时间派生的可预测实现
+
+性能:
+- 主循环 500ms 广播增加哈希变更检测，无变化不推送
+- 终端输出轮询改自适应退避（20→100ms）+ 32KB 缓冲
+- 修复 AppLayout/TopBookmarkBar 的 setInterval 泄漏（onUnmounted 清理）
+- vite 拆分 xterm/highlight/markdown chunk，主包 2.9MB→1.6MB
+
+死代码清理:
+- 删除 time 事件链（emitter + RegisterEvent + HelloWorld.vue 消费者）
+- 删除未使用的 main.readFromShell、零启.svg
+- 移除未引用依赖：monaco-editor、@vueuse/core、jszip、splitpanes、
+  vue-splitpane、xterm-addon-serialize
 
 ## 系统要求
 
