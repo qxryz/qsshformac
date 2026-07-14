@@ -321,6 +321,28 @@ export function GetDefaultGroupID() {
 }
 
 /**
+ * GetExternalAgentAudit 扫描 root 与常见专用用户的授权密钥，并读取当前登录会话。
+ * 扫描只读；返回值只包含算法、标签和指纹，不包含公钥正文。
+ * @param {string} connID
+ * @returns {$CancellablePromise<$models.ExternalAgentAudit | null>}
+ */
+export function GetExternalAgentAudit(connID) {
+    return $Call.ByID(1988855236, connID).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType15($result);
+    }));
+}
+
+/**
+ * GetExternalAgentScopeID 返回稳定的服务器级监管作用域 ID。
+ * 同一服务器切换 root 和专用用户后仍使用同一份监管记录。
+ * @param {string} connID
+ * @returns {$CancellablePromise<string>}
+ */
+export function GetExternalAgentScopeID(connID) {
+    return $Call.ByID(3622368146, connID);
+}
+
+/**
  * GetGroupByConnID 根据连接ID获取所属分组
  * @param {string} connID
  * @returns {$CancellablePromise<$models.SSHGroup | null>}
@@ -379,7 +401,7 @@ export function GetProcessDetail(connID, pid) {
  */
 export function GetProcessList(connID) {
     return $Call.ByID(2679255376, connID).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType15($result);
+        return $$createType17($result);
     }));
 }
 
@@ -410,7 +432,7 @@ export function GetSessionIDs(connID) {
  */
 export function GetSystemStats(connID) {
     return $Call.ByID(453794585, connID).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType17($result);
+        return $$createType19($result);
     }));
 }
 
@@ -468,7 +490,7 @@ export function KillProcess(connID, pid) {
  */
 export function ListDirectory(connID, remotePath) {
     return $Call.ByID(2186396432, connID, remotePath).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType19($result);
+        return $$createType21($result);
     }));
 }
 
@@ -480,7 +502,7 @@ export function ListDirectory(connID, remotePath) {
  */
 export function ListFiles(connID, path) {
     return $Call.ByID(4019260680, connID, path).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType19($result);
+        return $$createType21($result);
     }));
 }
 
@@ -575,6 +597,19 @@ export function ResizeTerminal(connID, cols, rows) {
  */
 export function ResizeTerminalByID(connID, sessionID, cols, rows) {
     return $Call.ByID(534449829, connID, sessionID, cols, rows);
+}
+
+/**
+ * RevokeExternalAgentKey 按指纹撤销指定账号的授权密钥。
+ * root 可以管理所有账号；处理普通账号时会降权到目标账号执行文件操作，
+ * 避免 root 直接写入低权限用户可控制的目录。
+ * @param {string} connID
+ * @param {string} username
+ * @param {string} fingerprint
+ * @returns {$CancellablePromise<void>}
+ */
+export function RevokeExternalAgentKey(connID, username, fingerprint) {
+    return $Call.ByID(4230525060, connID, username, fingerprint);
 }
 
 /**
@@ -768,9 +803,11 @@ const $$createType10 = $Create.Nullable($$createType9);
 const $$createType11 = $models.SSHClient.createFrom;
 const $$createType12 = $Create.Nullable($$createType11);
 const $$createType13 = $Create.Array($Create.Any);
-const $$createType14 = $models.ProcessInfo.createFrom;
-const $$createType15 = $Create.Array($$createType14);
-const $$createType16 = $models.SystemStats.createFrom;
-const $$createType17 = $Create.Nullable($$createType16);
-const $$createType18 = $models.FileInfo.createFrom;
-const $$createType19 = $Create.Array($$createType18);
+const $$createType14 = $models.ExternalAgentAudit.createFrom;
+const $$createType15 = $Create.Nullable($$createType14);
+const $$createType16 = $models.ProcessInfo.createFrom;
+const $$createType17 = $Create.Array($$createType16);
+const $$createType18 = $models.SystemStats.createFrom;
+const $$createType19 = $Create.Nullable($$createType18);
+const $$createType20 = $models.FileInfo.createFrom;
+const $$createType21 = $Create.Array($$createType20);

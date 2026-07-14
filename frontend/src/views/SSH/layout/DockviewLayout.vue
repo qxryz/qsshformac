@@ -52,6 +52,7 @@ import PortForwardPanel from '../panels/PortForwardPanel.vue'
 import FirewallPanel from '../panels/FirewallPanel.vue'
 import ProcessGuardPanel from '../panels/ProcessGuardPanel.vue'
 import BatchCommandPanel from '../panels/BatchCommandPanel.vue'
+import ExternalAgentPanel from '../panels/ExternalAgentPanel.vue'
 
 export default defineComponent({
   name: 'DockviewLayout',
@@ -66,7 +67,8 @@ export default defineComponent({
     portForward: PortForwardPanel,
     firewall: FirewallPanel,
     guardian: ProcessGuardPanel,
-    batchCmd: BatchCommandPanel
+    batchCmd: BatchCommandPanel,
+    externalAgent: ExternalAgentPanel
   },
   props: {
     connId: { type: String, required: true }

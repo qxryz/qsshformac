@@ -6,6 +6,10 @@
 // @ts-ignore: Unused imports
 import { Create as $Create } from "@wailsio/runtime";
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as time$0 from "../../time/models.js";
+
 /**
  * AIConfig AI配置结构（OpenAI 兼容格式）
  */
@@ -127,9 +131,9 @@ export class ChatMessage {
         if (!("timestamp" in $$source)) {
             /**
              * @member
-             * @type {string}
+             * @type {time$0.Time}
              */
-            this["timestamp"] = "0001-01-01T00:00:00.000Z";
+            this["timestamp"] = null;
         }
 
         Object.assign(this, $$source);

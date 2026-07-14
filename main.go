@@ -39,7 +39,7 @@ var trayIcon []byte
 
 // 版本信息
 const (
-	AppVersion = "0.3.2"
+	AppVersion = "0.3.2.1"
 	AppName    = "舟SSH"
 )
 

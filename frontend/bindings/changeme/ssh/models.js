@@ -6,6 +6,10 @@
 // @ts-ignore: Unused imports
 import { Create as $Create } from "@wailsio/runtime";
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as time$0 from "../../time/models.js";
+
 /**
  * AIConfig AI 配置（预留）
  */
@@ -633,6 +637,207 @@ export class DiskStats {
 }
 
 /**
+ * ExternalAgentAudit 是外部 Agent 接管监管面板使用的安全快照。
+ */
+export class ExternalAgentAudit {
+    /**
+     * Creates a new ExternalAgentAudit instance.
+     * @param {Partial<ExternalAgentAudit>} [$$source = {}] - The source object to create the ExternalAgentAudit.
+     */
+    constructor($$source = {}) {
+        if (!("keys" in $$source)) {
+            /**
+             * @member
+             * @type {ExternalAgentKey[]}
+             */
+            this["keys"] = [];
+        }
+        if (!("sessions" in $$source)) {
+            /**
+             * @member
+             * @type {ExternalAgentSession[]}
+             */
+            this["sessions"] = [];
+        }
+        if (!("canInspectAll" in $$source)) {
+            /**
+             * @member
+             * @type {boolean}
+             */
+            this["canInspectAll"] = false;
+        }
+        if (!("scannedAt" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["scannedAt"] = "";
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new ExternalAgentAudit instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {ExternalAgentAudit}
+     */
+    static createFrom($$source = {}) {
+        const $$createField0_0 = $$createType11;
+        const $$createField1_0 = $$createType13;
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        if ("keys" in $$parsedSource) {
+            $$parsedSource["keys"] = $$createField0_0($$parsedSource["keys"]);
+        }
+        if ("sessions" in $$parsedSource) {
+            $$parsedSource["sessions"] = $$createField1_0($$parsedSource["sessions"]);
+        }
+        return new ExternalAgentAudit(/** @type {Partial<ExternalAgentAudit>} */($$parsedSource));
+    }
+}
+
+/**
+ * ExternalAgentKey 是远端 authorized_keys 的脱敏视图。
+ * 公钥正文永远不会通过 Wails binding 返回前端。
+ */
+export class ExternalAgentKey {
+    /**
+     * Creates a new ExternalAgentKey instance.
+     * @param {Partial<ExternalAgentKey>} [$$source = {}] - The source object to create the ExternalAgentKey.
+     */
+    constructor($$source = {}) {
+        if (!("username" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["username"] = "";
+        }
+        if (!("algorithm" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["algorithm"] = "";
+        }
+        if (!("fingerprint" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["fingerprint"] = "";
+        }
+        if (!("comment" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["comment"] = "";
+        }
+        if (!("isRoot" in $$source)) {
+            /**
+             * @member
+             * @type {boolean}
+             */
+            this["isRoot"] = false;
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new ExternalAgentKey instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {ExternalAgentKey}
+     */
+    static createFrom($$source = {}) {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new ExternalAgentKey(/** @type {Partial<ExternalAgentKey>} */($$parsedSource));
+    }
+}
+
+/**
+ * ExternalAgentSession 描述当前可观察到的 SSH 登录会话。
+ * 这只能证明账号已登录，不能推断外部 Agent 正在执行的具体任务。
+ */
+export class ExternalAgentSession {
+    /**
+     * Creates a new ExternalAgentSession instance.
+     * @param {Partial<ExternalAgentSession>} [$$source = {}] - The source object to create the ExternalAgentSession.
+     */
+    constructor($$source = {}) {
+        if (!("username" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["username"] = "";
+        }
+        if (!("terminal" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["terminal"] = "";
+        }
+        if (!("loginAt" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["loginAt"] = "";
+        }
+        if (!("source" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["source"] = "";
+        }
+        if (!("authMethod" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["authMethod"] = "";
+        }
+        if (!("fingerprint" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["fingerprint"] = "";
+        }
+        if (!("active" in $$source)) {
+            /**
+             * @member
+             * @type {boolean}
+             */
+            this["active"] = false;
+        }
+        if (!("pid" in $$source)) {
+            /**
+             * @member
+             * @type {number}
+             */
+            this["pid"] = 0;
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new ExternalAgentSession instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {ExternalAgentSession}
+     */
+    static createFrom($$source = {}) {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new ExternalAgentSession(/** @type {Partial<ExternalAgentSession>} */($$parsedSource));
+    }
+}
+
+/**
  * FileInfo 文件信息结构体
  */
 export class FileInfo {
@@ -672,9 +877,9 @@ export class FileInfo {
         if (!("modTime" in $$source)) {
             /**
              * @member
-             * @type {string}
+             * @type {time$0.Time}
              */
-            this["modTime"] = "0001-01-01T00:00:00.000Z";
+            this["modTime"] = null;
         }
         if (!("isDir" in $$source)) {
             /**
@@ -822,8 +1027,8 @@ export class FirewallInfo {
      * @returns {FirewallInfo}
      */
     static createFrom($$source = {}) {
-        const $$createField2_0 = $$createType11;
-        const $$createField4_0 = $$createType12;
+        const $$createField2_0 = $$createType15;
+        const $$createField4_0 = $$createType16;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("rules" in $$parsedSource) {
             $$parsedSource["rules"] = $$createField2_0($$parsedSource["rules"]);
@@ -1261,7 +1466,7 @@ export class NetworkStats {
      * @returns {NetworkStats}
      */
     static createFrom($$source = {}) {
-        const $$createField0_0 = $$createType14;
+        const $$createField0_0 = $$createType18;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("interfaces" in $$parsedSource) {
             $$parsedSource["interfaces"] = $$createField0_0($$parsedSource["interfaces"]);
@@ -1687,7 +1892,7 @@ export class SSHGroup {
      * @returns {SSHGroup}
      */
     static createFrom($$source = {}) {
-        const $$createField2_0 = $$createType12;
+        const $$createField2_0 = $$createType16;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("conn_ids" in $$parsedSource) {
             $$parsedSource["conn_ids"] = $$createField2_0($$parsedSource["conn_ids"]);
@@ -1888,10 +2093,10 @@ export class SystemStats {
      * @returns {SystemStats}
      */
     static createFrom($$source = {}) {
-        const $$createField2_0 = $$createType15;
-        const $$createField3_0 = $$createType16;
-        const $$createField4_0 = $$createType17;
-        const $$createField5_0 = $$createType18;
+        const $$createField2_0 = $$createType19;
+        const $$createField3_0 = $$createType20;
+        const $$createField4_0 = $$createType21;
+        const $$createField5_0 = $$createType22;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("cpu" in $$parsedSource) {
             $$parsedSource["cpu"] = $$createField2_0($$parsedSource["cpu"]);
@@ -2072,12 +2277,16 @@ const $$createType6 = LoadAvg.createFrom;
 const $$createType7 = DiskPartition.createFrom;
 const $$createType8 = $Create.Array($$createType7);
 const $$createType9 = DiskIOStats.createFrom;
-const $$createType10 = FirewallRule.createFrom;
+const $$createType10 = ExternalAgentKey.createFrom;
 const $$createType11 = $Create.Array($$createType10);
-const $$createType12 = $Create.Array($Create.Any);
-const $$createType13 = NetInterface.createFrom;
-const $$createType14 = $Create.Array($$createType13);
-const $$createType15 = CPUStats.createFrom;
-const $$createType16 = MemoryStats.createFrom;
-const $$createType17 = DiskStats.createFrom;
-const $$createType18 = NetworkStats.createFrom;
+const $$createType12 = ExternalAgentSession.createFrom;
+const $$createType13 = $Create.Array($$createType12);
+const $$createType14 = FirewallRule.createFrom;
+const $$createType15 = $Create.Array($$createType14);
+const $$createType16 = $Create.Array($Create.Any);
+const $$createType17 = NetInterface.createFrom;
+const $$createType18 = $Create.Array($$createType17);
+const $$createType19 = CPUStats.createFrom;
+const $$createType20 = MemoryStats.createFrom;
+const $$createType21 = DiskStats.createFrom;
+const $$createType22 = NetworkStats.createFrom;

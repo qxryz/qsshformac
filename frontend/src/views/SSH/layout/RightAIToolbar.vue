@@ -21,6 +21,10 @@
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
           <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
         </svg>
+        <svg v-else-if="tool.panelType === 'externalAgent'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 3 4.5 6v5.7c0 4.7 3.1 7.7 7.5 9.3 4.4-1.6 7.5-4.6 7.5-9.3V6L12 3Z"/>
+          <circle cx="11" cy="10" r="2"/><path d="m12.5 11.5 4 4M15 14l-1.5 1.5"/>
+        </svg>
       </button>
     </div>
     
@@ -43,7 +47,8 @@ const emit = defineEmits(['toggle-panel'])
 const aiTools = [
   { id: 'ai', panelType: 'aiChat', title: 'AI 助手' },
   { id: 'batchCmd', panelType: 'batchCmd', title: '批量命令' },
-  { id: 'logs', panelType: 'logs', title: '操作日志' }
+  { id: 'logs', panelType: 'logs', title: '操作日志' },
+  { id: 'externalAgent', panelType: 'externalAgent', title: '外部 Agent 密钥监管' }
 ]
 
 // 检查面板是否激活

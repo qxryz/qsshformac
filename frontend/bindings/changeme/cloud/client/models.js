@@ -6,6 +6,10 @@
 // @ts-ignore: Unused imports
 import { Create as $Create } from "@wailsio/runtime";
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as time$0 from "../../../time/models.js";
+
 /**
  * SyncConnection 同步的连接配置
  */
@@ -74,7 +78,7 @@ export class SyncConnection {
         if (/** @type {any} */(false)) {
             /**
              * @member
-             * @type {string | undefined}
+             * @type {time$0.Time | undefined}
              */
             this["updatedAt"] = undefined;
         }
