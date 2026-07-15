@@ -33,6 +33,59 @@ func TestParseExternalAgentAuditDoesNotExposePublicKey(t *testing.T) {
 	}
 }
 
+func TestParseExternalAgentAuditIncludesRevokedKeyState(t *testing.T) {
+	output := "__QSSH_EXTERNAL_SCOPE__\tall\n" +
+		"__QSSH_EXTERNAL_KEY__\trevoked\t/home/deploy-agent/.ssh/authorized_keys\tssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKgV3NIV8l5O2KTJ2WcH2O9qOpmG4Bz21PH8b4m9S8TQ codex-example-deploy\n"
+	audit := parseExternalAgentAudit(output)
+	if len(audit.Keys) != 1 || !audit.Keys[0].Revoked || audit.Keys[0].Username != "deploy-agent" {
+		t.Fatalf("revoked key state was not parsed: %#v", audit.Keys)
+	}
+}
+
+func TestTakeAndAppendAuthorizedKeyByFingerprint(t *testing.T) {
+	line := "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKgV3NIV8l5O2KTJ2WcH2O9qOpmG4Bz21PH8b4m9S8TQ codex-example-deploy"
+	pub, _, _, _, err := gossh.ParseAuthorizedKey([]byte(line))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fingerprint := gossh.FingerprintSHA256(pub)
+	content := "# keep this comment\n" + line + "\n"
+	remaining, taken, found := takeAuthorizedKeyByFingerprint(content, fingerprint)
+	if !found || taken != line || remaining != "# keep this comment\n" {
+		t.Fatalf("unexpected take result: found=%v taken=%q remaining=%q", found, taken, remaining)
+	}
+	if restored := appendAuthorizedKeyLine(remaining, taken); restored != content {
+		t.Fatalf("unexpected restored content: %q", restored)
+	}
+}
+
+func TestParseExternalAgentAccountPermissionsLimitedSudo(t *testing.T) {
+	output := "__QSSH_ACCOUNT_GROUPS__\tzhouzhou-deploy\n" +
+		"__QSSH_ACCOUNT_SUDO__\n" +
+		"Matching Defaults entries for zhouzhou-deploy on host:\n" +
+		"    env_reset, use_pty\n\n" +
+		"User zhouzhou-deploy may run the following commands on host:\n" +
+		"    (root) NOPASSWD: /usr/bin/systemctl restart zhouzhou-data-api\n" +
+		"    (root) NOPASSWD: /usr/bin/systemctl status zhouzhou-data-api\n"
+	permissions := parseExternalAgentAccountPermissions("zhouzhou-deploy", output)
+	if permissions.SudoMode != "limited" || len(permissions.SudoRules) != 2 {
+		t.Fatalf("limited sudo was not parsed: %#v", permissions)
+	}
+	if len(permissions.Groups) != 1 || permissions.Groups[0] != "zhouzhou-deploy" {
+		t.Fatalf("groups were not parsed: %#v", permissions.Groups)
+	}
+}
+
+func TestParseExternalAgentAccountPermissionsNoSudo(t *testing.T) {
+	output := "__QSSH_ACCOUNT_GROUPS__\tdeploy-agent\n" +
+		"__QSSH_ACCOUNT_SUDO__\n" +
+		"User deploy-agent is not allowed to run sudo on host.\n"
+	permissions := parseExternalAgentAccountPermissions("deploy-agent", output)
+	if permissions.SudoMode != "none" || len(permissions.SudoRules) != 0 {
+		t.Fatalf("no-sudo account was not parsed: %#v", permissions)
+	}
+}
+
 func TestUsernameFromAuthorizedKeysPath(t *testing.T) {
 	cases := map[string]string{
 		"/root/.ssh/authorized_keys":                 "root",

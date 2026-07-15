@@ -12,7 +12,7 @@ export const PANEL_TYPES = {
   FIREWALL: 'firewall',           // 防火墙
   GUARDIAN: 'guardian',           // 进程守护
   BATCH_CMD: 'batchCmd',         // 批量命令
-  EXTERNAL_AGENT: 'externalAgent', // 外部 Agent SSH 密钥监管
+  EXTERNAL_AGENT: 'externalAgent', // SSH 密钥管理
 }
 
 // 面板配置
@@ -63,7 +63,7 @@ export const PANEL_CONFIG = {
     component: 'BatchCommandPanel',
   },
   [PANEL_TYPES.EXTERNAL_AGENT]: {
-    title: '外部 Agent 监管',
+    title: '密钥管理',
     icon: 'agent-key',
     component: 'ExternalAgentPanel',
   },

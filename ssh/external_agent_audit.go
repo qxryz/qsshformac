@@ -33,6 +33,7 @@ type ExternalAgentKey struct {
 	Fingerprint string `json:"fingerprint"`
 	Comment     string `json:"comment"`
 	IsRoot      bool   `json:"isRoot"`
+	Revoked     bool   `json:"revoked"`
 }
 
 // ExternalAgentSession 描述当前可观察到的 SSH 登录会话。
@@ -54,6 +55,15 @@ type ExternalAgentAudit struct {
 	Sessions      []ExternalAgentSession `json:"sessions"`
 	CanInspectAll bool                   `json:"canInspectAll"`
 	ScannedAt     string                 `json:"scannedAt"`
+}
+
+// ExternalAgentAccountPermissions 是账号权限的按需只读快照。
+// SudoMode 为 none、limited、full 或 unknown。
+type ExternalAgentAccountPermissions struct {
+	Username  string   `json:"username"`
+	Groups    []string `json:"groups"`
+	SudoMode  string   `json:"sudoMode"`
+	SudoRules []string `json:"sudoRules"`
 }
 
 const externalAgentKeyMarker = "__QSSH_EXTERNAL_KEY__"
@@ -85,10 +95,14 @@ else
   files="$HOME/.ssh/authorized_keys"
 fi
 for f in $files; do
-  [ -r "$f" ] || continue
-  while IFS= read -r line; do
-    printf '__QSSH_EXTERNAL_KEY__\t%s\t%s\n' "$f" "$line"
-  done < "$f"
+  for state_file in "active:$f" "revoked:${f}.qssh-revoked"; do
+    state="${state_file%%:*}"
+    key_file="${state_file#*:}"
+    [ -r "$key_file" ] || continue
+    while IFS= read -r line; do
+      printf '__QSSH_EXTERNAL_KEY__\t%s\t%s\t%s\n' "$state" "$f" "$line"
+    done < "$key_file"
+  done
 done
 printf '__QSSH_EXTERNAL_WHO__\n'
 who 2>/dev/null || true
@@ -165,21 +179,26 @@ func parseExternalAgentAudit(output string) ExternalAgentAudit {
 			continue
 		}
 		if strings.HasPrefix(line, externalAgentKeyMarker+"\t") {
-			parts := strings.SplitN(line, "\t", 3)
-			if len(parts) != 3 {
+			parts := strings.SplitN(line, "\t", 4)
+			if len(parts) < 3 {
 				continue
 			}
-			pub, comment, _, _, err := gossh.ParseAuthorizedKey([]byte(strings.TrimSpace(parts[2])))
+			state, path, keyLine := "active", parts[1], parts[2]
+			if len(parts) == 4 {
+				state, path, keyLine = parts[1], parts[2], parts[3]
+			}
+			pub, comment, _, _, err := gossh.ParseAuthorizedKey([]byte(strings.TrimSpace(keyLine)))
 			if err != nil {
 				continue
 			}
-			username := usernameFromAuthorizedKeysPath(parts[1])
+			username := usernameFromAuthorizedKeysPath(path)
 			audit.Keys = append(audit.Keys, ExternalAgentKey{
 				Username:    username,
 				Algorithm:   pub.Type(),
 				Fingerprint: gossh.FingerprintSHA256(pub),
 				Comment:     strings.TrimSpace(comment),
 				IsRoot:      username == "root",
+				Revoked:     state == "revoked",
 			})
 			continue
 		}
@@ -275,10 +294,133 @@ func usernameFromAuthorizedKeysPath(path string) string {
 
 var safeRemoteUsername = regexp.MustCompile(`^[a-z_][a-z0-9_-]{0,31}$`)
 
-// RevokeExternalAgentKey 按指纹撤销指定账号的授权密钥。
+const externalAgentGroupsMarker = "__QSSH_ACCOUNT_GROUPS__"
+const externalAgentSudoMarker = "__QSSH_ACCOUNT_SUDO__"
+
+var externalAgentSudoRulePattern = regexp.MustCompile(`^\(([^)]*)\)[[:space:]]+(?:(NOPASSWD|PASSWD):[[:space:]]*)?(.+)$`)
+
+// GetExternalAgentAccountPermissions 按需读取指定账号的用户组与 sudo 规则。
+// root 可以检查所有账号，普通连接只能检查当前登录账号。
+func (s *SSHService) GetExternalAgentAccountPermissions(connID, username string) (*ExternalAgentAccountPermissions, error) {
+	if !safeRemoteUsername.MatchString(username) {
+		return nil, fmt.Errorf("用户名格式不安全")
+	}
+
+	s.mu.RLock()
+	client, exists := s.clients[connID]
+	s.mu.RUnlock()
+	if !exists {
+		return nil, fmt.Errorf("连接不存在: %s", connID)
+	}
+	currentUser := ""
+	if client.config != nil {
+		currentUser = client.config.Username
+	}
+	if !canRevokeExternalAgentKeyForUser(currentUser, username) {
+		return nil, fmt.Errorf("当前 SSH 登录账号（%s）无权检查 %s 的权限", currentUser, username)
+	}
+
+	var sudoCommand string
+	if currentUser == "root" {
+		sudoCommand = fmt.Sprintf(`sudo -n -l -U %s 2>&1 || true`, shellSingleQuote(username))
+	} else {
+		sudoCommand = `sudo -n -l 2>&1 || true`
+	}
+	command := fmt.Sprintf(`set +e
+printf '%s\t'
+id -nG %s 2>/dev/null || true
+printf '%s\n'
+if command -v sudo >/dev/null 2>&1; then %s; else printf 'sudo command is not installed\n'; fi`,
+		externalAgentGroupsMarker, shellSingleQuote(username), externalAgentSudoMarker, sudoCommand,
+	)
+	result, err := client.ExecuteCommand(command)
+	if err != nil || result == nil || !result.Success {
+		return nil, fmt.Errorf("读取 %s 的账号权限失败", username)
+	}
+	permissions := parseExternalAgentAccountPermissions(username, result.Stdout)
+	return &permissions, nil
+}
+
+func parseExternalAgentAccountPermissions(username, output string) ExternalAgentAccountPermissions {
+	permissions := ExternalAgentAccountPermissions{
+		Username:  username,
+		Groups:    []string{},
+		SudoMode:  "unknown",
+		SudoRules: []string{},
+	}
+	inSudo := false
+	sudoText := ""
+	for _, line := range strings.Split(output, "\n") {
+		if strings.HasPrefix(line, externalAgentGroupsMarker+"\t") {
+			permissions.Groups = strings.Fields(strings.TrimPrefix(line, externalAgentGroupsMarker+"\t"))
+			continue
+		}
+		if line == externalAgentSudoMarker {
+			inSudo = true
+			continue
+		}
+		if !inSudo {
+			continue
+		}
+		sudoText += line + "\n"
+		trimmed := strings.TrimSpace(line)
+		matches := externalAgentSudoRulePattern.FindStringSubmatch(trimmed)
+		if len(matches) != 4 {
+			continue
+		}
+		rule := strings.TrimSpace(matches[3])
+		if rule == "" {
+			continue
+		}
+		prefix := "(" + strings.TrimSpace(matches[1]) + ") "
+		if matches[2] != "" {
+			prefix += matches[2] + ": "
+		}
+		permissions.SudoRules = append(permissions.SudoRules, prefix+rule)
+		if rule == "ALL" {
+			permissions.SudoMode = "full"
+		}
+	}
+
+	if username == "root" {
+		permissions.SudoMode = "full"
+		if len(permissions.SudoRules) == 0 {
+			permissions.SudoRules = []string{"root 固有完整系统权限"}
+		}
+		return permissions
+	}
+	if permissions.SudoMode != "full" && len(permissions.SudoRules) > 0 {
+		permissions.SudoMode = "limited"
+		return permissions
+	}
+	lower := strings.ToLower(sudoText)
+	if strings.Contains(lower, "not allowed to run sudo") ||
+		strings.Contains(lower, "may not run sudo") ||
+		strings.Contains(lower, "is not in the sudoers file") ||
+		strings.Contains(lower, "sudo command is not installed") {
+		permissions.SudoMode = "none"
+	}
+	return permissions
+}
+
+// RevokeExternalAgentKey 按指纹暂停指定账号的授权，并保留可恢复副本。
 // root 可以管理所有账号；处理普通账号时会降权到目标账号执行文件操作，
 // 避免 root 直接写入低权限用户可控制的目录。
 func (s *SSHService) RevokeExternalAgentKey(connID, username, fingerprint string) error {
+	return s.changeExternalAgentKeyState(connID, username, fingerprint, "revoke")
+}
+
+// RestoreExternalAgentKey 将已撤销区中的公钥恢复到 authorized_keys。
+func (s *SSHService) RestoreExternalAgentKey(connID, username, fingerprint string) error {
+	return s.changeExternalAgentKeyState(connID, username, fingerprint, "restore")
+}
+
+// PermanentlyRevokeExternalAgentKey 从授权文件和可恢复区彻底删除公钥。
+func (s *SSHService) PermanentlyRevokeExternalAgentKey(connID, username, fingerprint string) error {
+	return s.changeExternalAgentKeyState(connID, username, fingerprint, "permanent")
+}
+
+func (s *SSHService) changeExternalAgentKeyState(connID, username, fingerprint, action string) error {
 	if !safeRemoteUsername.MatchString(username) {
 		return fmt.Errorf("用户名格式不安全")
 	}
@@ -297,46 +439,138 @@ func (s *SSHService) RevokeExternalAgentKey(connID, username, fingerprint string
 		currentUser = client.config.Username
 	}
 	if !canRevokeExternalAgentKeyForUser(currentUser, username) {
-		return fmt.Errorf("当前 SSH 登录账号（%s）无权撤销 %s 的密钥", currentUser, username)
+		return fmt.Errorf("当前 SSH 登录账号（%s）无权管理 %s 的密钥", currentUser, username)
 	}
 
-	readCommand := externalAgentCommandAsUser(currentUser, username, authorizedKeysReadScript())
+	readCommand := externalAgentCommandAsUser(currentUser, username, authorizedKeysStateReadScript())
 	readResult, err := client.ExecuteCommand(readCommand)
 	if err != nil || readResult == nil || !readResult.Success {
-		return fmt.Errorf("读取 authorized_keys 失败")
+		return fmt.Errorf("读取账号密钥状态失败")
 	}
 
-	content, removed := removeAuthorizedKeyByFingerprint(readResult.Stdout, fingerprint)
-	if !removed {
-		return fmt.Errorf("未找到对应密钥，可能已被撤销")
+	active, revoked := splitAuthorizedKeyState(readResult.Stdout)
+	activeAfter, activeLine, activeFound := takeAuthorizedKeyByFingerprint(active, fingerprint)
+	revokedAfter, revokedLine, revokedFound := takeAuthorizedKeyByFingerprint(revoked, fingerprint)
+	switch action {
+	case "revoke":
+		if !activeFound {
+			return fmt.Errorf("未找到可撤销的授权，可能已经撤销")
+		}
+		active = activeAfter
+		if !revokedFound {
+			revoked = appendAuthorizedKeyLine(revoked, activeLine)
+		}
+	case "restore":
+		if !revokedFound {
+			return fmt.Errorf("未找到可恢复的公钥")
+		}
+		revoked = revokedAfter
+		if !activeFound {
+			active = appendAuthorizedKeyLine(active, revokedLine)
+		}
+	case "permanent":
+		if !activeFound && !revokedFound {
+			return fmt.Errorf("未找到对应公钥")
+		}
+		active, revoked = activeAfter, revokedAfter
+	default:
+		return fmt.Errorf("不支持的密钥操作")
 	}
 
-	encoded := base64.StdEncoding.EncodeToString([]byte(content))
-	expectedHash := fmt.Sprintf("%x", sha256.Sum256([]byte(readResult.Stdout)))
+	encodedActive := base64.StdEncoding.EncodeToString([]byte(active))
+	encodedRevoked := base64.StdEncoding.EncodeToString([]byte(revoked))
+	expectedActiveHash := fmt.Sprintf("%x", sha256.Sum256([]byte(splitAuthorizedKeyStatePart(readResult.Stdout, externalAgentActiveStateMarker))))
+	expectedRevokedHash := fmt.Sprintf("%x", sha256.Sum256([]byte(splitAuthorizedKeyStatePart(readResult.Stdout, externalAgentRevokedStateMarker))))
 	writeScript := fmt.Sprintf(
 		`set -eu
 dir="$HOME/.ssh"
 path="$dir/authorized_keys"
-backup="$dir/authorized_keys.qssh.bak"
+revoked="$dir/authorized_keys.qssh-revoked"
+[ ! -e "$path.qssh.bak" ] || [ ! -L "$path.qssh.bak" ] || exit 1
+[ ! -e "$revoked.qssh.bak" ] || [ ! -L "$revoked.qssh.bak" ] || exit 1
 [ -d "$dir" ] && [ ! -L "$dir" ] && [ -f "$path" ] && [ ! -L "$path" ] || exit 1
-[ ! -e "$backup" ] || [ ! -L "$backup" ] || exit 1
-if command -v sha256sum >/dev/null 2>&1; then current_hash="$(sha256sum "$path" | awk '{print $1}')"; else current_hash="$(shasum -a 256 "$path" | awk '{print $1}')"; fi
-[ "$current_hash" = %s ] || exit 1
-tmp="$(mktemp "$dir/.authorized_keys.qssh.XXXXXX")"
-trap 'rm -f "$tmp"' EXIT
-if ! printf '%%s' %s | (base64 -d 2>/dev/null || base64 -D) > "$tmp"; then exit 1; fi
-chmod 600 "$tmp"
-cp -p "$path" "$backup"
-mv -f "$tmp" "$path"
+[ ! -e "$revoked" ] || { [ -f "$revoked" ] && [ ! -L "$revoked" ]; } || exit 1
+hash_file() { if [ -f "$1" ]; then if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | awk '{print $1}'; else shasum -a 256 "$1" | awk '{print $1}'; fi; else printf '%%s' %s; fi; }
+[ "$(hash_file "$path")" = %s ] || exit 1
+[ "$(hash_file "$revoked")" = %s ] || exit 1
+active_tmp="$(mktemp "$dir/.authorized_keys.qssh.XXXXXX")"
+revoked_tmp="$(mktemp "$dir/.authorized_keys-revoked.qssh.XXXXXX")"
+trap 'rm -f "$active_tmp" "$revoked_tmp"' EXIT
+printf '%%s' %s | (base64 -d 2>/dev/null || base64 -D) > "$active_tmp"
+printf '%%s' %s | (base64 -d 2>/dev/null || base64 -D) > "$revoked_tmp"
+chmod 600 "$active_tmp" "$revoked_tmp"
+cp -p "$path" "$path.qssh.bak"
+[ ! -f "$revoked" ] || cp -p "$revoked" "$revoked.qssh.bak"
+mv -f "$active_tmp" "$path"
+if [ -s "$revoked_tmp" ]; then mv -f "$revoked_tmp" "$revoked"; else rm -f "$revoked" "$revoked_tmp"; fi
 trap - EXIT`,
-		shellSingleQuote(expectedHash), shellSingleQuote(encoded),
+		shellSingleQuote(fmt.Sprintf("%x", sha256.Sum256(nil))),
+		shellSingleQuote(expectedActiveHash), shellSingleQuote(expectedRevokedHash),
+		shellSingleQuote(encodedActive), shellSingleQuote(encodedRevoked),
 	)
 	writeCommand := externalAgentCommandAsUser(currentUser, username, writeScript)
 	writeResult, err := client.ExecuteCommand(writeCommand)
 	if err != nil || writeResult == nil || !writeResult.Success {
-		return fmt.Errorf("撤销密钥失败")
+		return fmt.Errorf("更新密钥状态失败")
 	}
 	return nil
+}
+
+const externalAgentActiveStateMarker = "__QSSH_ACTIVE_KEYS__"
+const externalAgentRevokedStateMarker = "__QSSH_REVOKED_KEYS__"
+
+func authorizedKeysStateReadScript() string {
+	return `set -eu
+path="$HOME/.ssh/authorized_keys"
+revoked="$HOME/.ssh/authorized_keys.qssh-revoked"
+[ -r "$path" ] && [ ! -L "$path" ] || exit 1
+printf '__QSSH_ACTIVE_KEYS__\t'
+(base64 < "$path" | tr -d '\n')
+printf '\n__QSSH_REVOKED_KEYS__\t'
+if [ -r "$revoked" ] && [ ! -L "$revoked" ]; then base64 < "$revoked" | tr -d '\n'; fi
+printf '\n'`
+}
+
+func splitAuthorizedKeyState(output string) (string, string) {
+	return splitAuthorizedKeyStatePart(output, externalAgentActiveStateMarker), splitAuthorizedKeyStatePart(output, externalAgentRevokedStateMarker)
+}
+
+func splitAuthorizedKeyStatePart(output, marker string) string {
+	for _, line := range strings.Split(output, "\n") {
+		prefix := marker + "\t"
+		if !strings.HasPrefix(line, prefix) {
+			continue
+		}
+		decoded, err := base64.StdEncoding.DecodeString(strings.TrimSpace(strings.TrimPrefix(line, prefix)))
+		if err == nil {
+			return string(decoded)
+		}
+	}
+	return ""
+}
+
+func takeAuthorizedKeyByFingerprint(content, fingerprint string) (string, string, bool) {
+	kept := make([]string, 0)
+	matchedLine := ""
+	for _, line := range strings.SplitAfter(content, "\n") {
+		trimmed := strings.TrimSpace(line)
+		pub, _, _, _, err := gossh.ParseAuthorizedKey([]byte(trimmed))
+		if err == nil && gossh.FingerprintSHA256(pub) == fingerprint {
+			if matchedLine == "" {
+				matchedLine = strings.TrimRight(line, "\r\n")
+			}
+			continue
+		}
+		kept = append(kept, line)
+	}
+	return strings.Join(kept, ""), matchedLine, matchedLine != ""
+}
+
+func appendAuthorizedKeyLine(content, line string) string {
+	if strings.TrimSpace(content) == "" {
+		return line + "\n"
+	}
+	return strings.TrimRight(content, "\r\n") + "\n" + line + "\n"
 }
 
 func removeAuthorizedKeyByFingerprint(content, fingerprint string) (string, bool) {

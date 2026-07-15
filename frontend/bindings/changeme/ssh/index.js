@@ -30,6 +30,7 @@ export {
     DiskIOStats,
     DiskPartition,
     DiskStats,
+    ExternalAgentAccountPermissions,
     ExternalAgentAudit,
     ExternalAgentKey,
     ExternalAgentSession,

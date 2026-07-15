@@ -637,6 +637,67 @@ export class DiskStats {
 }
 
 /**
+ * ExternalAgentAccountPermissions 是账号权限的按需只读快照。
+ * SudoMode 为 none、limited、full 或 unknown。
+ */
+export class ExternalAgentAccountPermissions {
+    /**
+     * Creates a new ExternalAgentAccountPermissions instance.
+     * @param {Partial<ExternalAgentAccountPermissions>} [$$source = {}] - The source object to create the ExternalAgentAccountPermissions.
+     */
+    constructor($$source = {}) {
+        if (!("username" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["username"] = "";
+        }
+        if (!("groups" in $$source)) {
+            /**
+             * @member
+             * @type {string[]}
+             */
+            this["groups"] = [];
+        }
+        if (!("sudoMode" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["sudoMode"] = "";
+        }
+        if (!("sudoRules" in $$source)) {
+            /**
+             * @member
+             * @type {string[]}
+             */
+            this["sudoRules"] = [];
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new ExternalAgentAccountPermissions instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {ExternalAgentAccountPermissions}
+     */
+    static createFrom($$source = {}) {
+        const $$createField1_0 = $$createType10;
+        const $$createField3_0 = $$createType10;
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        if ("groups" in $$parsedSource) {
+            $$parsedSource["groups"] = $$createField1_0($$parsedSource["groups"]);
+        }
+        if ("sudoRules" in $$parsedSource) {
+            $$parsedSource["sudoRules"] = $$createField3_0($$parsedSource["sudoRules"]);
+        }
+        return new ExternalAgentAccountPermissions(/** @type {Partial<ExternalAgentAccountPermissions>} */($$parsedSource));
+    }
+}
+
+/**
  * ExternalAgentAudit 是外部 Agent 接管监管面板使用的安全快照。
  */
 export class ExternalAgentAudit {
@@ -683,8 +744,8 @@ export class ExternalAgentAudit {
      * @returns {ExternalAgentAudit}
      */
     static createFrom($$source = {}) {
-        const $$createField0_0 = $$createType11;
-        const $$createField1_0 = $$createType13;
+        const $$createField0_0 = $$createType12;
+        const $$createField1_0 = $$createType14;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("keys" in $$parsedSource) {
             $$parsedSource["keys"] = $$createField0_0($$parsedSource["keys"]);
@@ -740,6 +801,13 @@ export class ExternalAgentKey {
              * @type {boolean}
              */
             this["isRoot"] = false;
+        }
+        if (!("revoked" in $$source)) {
+            /**
+             * @member
+             * @type {boolean}
+             */
+            this["revoked"] = false;
         }
 
         Object.assign(this, $$source);
@@ -1027,8 +1095,8 @@ export class FirewallInfo {
      * @returns {FirewallInfo}
      */
     static createFrom($$source = {}) {
-        const $$createField2_0 = $$createType15;
-        const $$createField4_0 = $$createType16;
+        const $$createField2_0 = $$createType16;
+        const $$createField4_0 = $$createType10;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("rules" in $$parsedSource) {
             $$parsedSource["rules"] = $$createField2_0($$parsedSource["rules"]);
@@ -1892,7 +1960,7 @@ export class SSHGroup {
      * @returns {SSHGroup}
      */
     static createFrom($$source = {}) {
-        const $$createField2_0 = $$createType16;
+        const $$createField2_0 = $$createType10;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("conn_ids" in $$parsedSource) {
             $$parsedSource["conn_ids"] = $$createField2_0($$parsedSource["conn_ids"]);
@@ -2277,13 +2345,13 @@ const $$createType6 = LoadAvg.createFrom;
 const $$createType7 = DiskPartition.createFrom;
 const $$createType8 = $Create.Array($$createType7);
 const $$createType9 = DiskIOStats.createFrom;
-const $$createType10 = ExternalAgentKey.createFrom;
-const $$createType11 = $Create.Array($$createType10);
-const $$createType12 = ExternalAgentSession.createFrom;
-const $$createType13 = $Create.Array($$createType12);
-const $$createType14 = FirewallRule.createFrom;
-const $$createType15 = $Create.Array($$createType14);
-const $$createType16 = $Create.Array($Create.Any);
+const $$createType10 = $Create.Array($Create.Any);
+const $$createType11 = ExternalAgentKey.createFrom;
+const $$createType12 = $Create.Array($$createType11);
+const $$createType13 = ExternalAgentSession.createFrom;
+const $$createType14 = $Create.Array($$createType13);
+const $$createType15 = FirewallRule.createFrom;
+const $$createType16 = $Create.Array($$createType15);
 const $$createType17 = NetInterface.createFrom;
 const $$createType18 = $Create.Array($$createType17);
 const $$createType19 = CPUStats.createFrom;

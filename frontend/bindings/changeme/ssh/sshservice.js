@@ -321,6 +321,19 @@ export function GetDefaultGroupID() {
 }
 
 /**
+ * GetExternalAgentAccountPermissions 按需读取指定账号的用户组与 sudo 规则。
+ * root 可以检查所有账号，普通连接只能检查当前登录账号。
+ * @param {string} connID
+ * @param {string} username
+ * @returns {$CancellablePromise<$models.ExternalAgentAccountPermissions | null>}
+ */
+export function GetExternalAgentAccountPermissions(connID, username) {
+    return $Call.ByID(2638973356, connID, username).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType15($result);
+    }));
+}
+
+/**
  * GetExternalAgentAudit 扫描 root 与常见专用用户的授权密钥，并读取当前登录会话。
  * 扫描只读；返回值只包含算法、标签和指纹，不包含公钥正文。
  * @param {string} connID
@@ -328,7 +341,7 @@ export function GetDefaultGroupID() {
  */
 export function GetExternalAgentAudit(connID) {
     return $Call.ByID(1988855236, connID).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType15($result);
+        return $$createType17($result);
     }));
 }
 
@@ -401,7 +414,7 @@ export function GetProcessDetail(connID, pid) {
  */
 export function GetProcessList(connID) {
     return $Call.ByID(2679255376, connID).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType17($result);
+        return $$createType19($result);
     }));
 }
 
@@ -432,7 +445,7 @@ export function GetSessionIDs(connID) {
  */
 export function GetSystemStats(connID) {
     return $Call.ByID(453794585, connID).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType19($result);
+        return $$createType21($result);
     }));
 }
 
@@ -490,7 +503,7 @@ export function KillProcess(connID, pid) {
  */
 export function ListDirectory(connID, remotePath) {
     return $Call.ByID(2186396432, connID, remotePath).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType21($result);
+        return $$createType23($result);
     }));
 }
 
@@ -502,7 +515,7 @@ export function ListDirectory(connID, remotePath) {
  */
 export function ListFiles(connID, path) {
     return $Call.ByID(4019260680, connID, path).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType21($result);
+        return $$createType23($result);
     }));
 }
 
@@ -515,6 +528,17 @@ export function ListFiles(connID, path) {
  */
 export function OpenSSHWindow(groupID, groupName, activeConnID) {
     return $Call.ByID(2969027497, groupID, groupName, activeConnID);
+}
+
+/**
+ * PermanentlyRevokeExternalAgentKey 从授权文件和可恢复区彻底删除公钥。
+ * @param {string} connID
+ * @param {string} username
+ * @param {string} fingerprint
+ * @returns {$CancellablePromise<void>}
+ */
+export function PermanentlyRevokeExternalAgentKey(connID, username, fingerprint) {
+    return $Call.ByID(2577005083, connID, username, fingerprint);
 }
 
 /**
@@ -600,7 +624,18 @@ export function ResizeTerminalByID(connID, sessionID, cols, rows) {
 }
 
 /**
- * RevokeExternalAgentKey 按指纹撤销指定账号的授权密钥。
+ * RestoreExternalAgentKey 将已撤销区中的公钥恢复到 authorized_keys。
+ * @param {string} connID
+ * @param {string} username
+ * @param {string} fingerprint
+ * @returns {$CancellablePromise<void>}
+ */
+export function RestoreExternalAgentKey(connID, username, fingerprint) {
+    return $Call.ByID(2596191606, connID, username, fingerprint);
+}
+
+/**
+ * RevokeExternalAgentKey 按指纹暂停指定账号的授权，并保留可恢复副本。
  * root 可以管理所有账号；处理普通账号时会降权到目标账号执行文件操作，
  * 避免 root 直接写入低权限用户可控制的目录。
  * @param {string} connID
@@ -803,11 +838,13 @@ const $$createType10 = $Create.Nullable($$createType9);
 const $$createType11 = $models.SSHClient.createFrom;
 const $$createType12 = $Create.Nullable($$createType11);
 const $$createType13 = $Create.Array($Create.Any);
-const $$createType14 = $models.ExternalAgentAudit.createFrom;
+const $$createType14 = $models.ExternalAgentAccountPermissions.createFrom;
 const $$createType15 = $Create.Nullable($$createType14);
-const $$createType16 = $models.ProcessInfo.createFrom;
-const $$createType17 = $Create.Array($$createType16);
-const $$createType18 = $models.SystemStats.createFrom;
-const $$createType19 = $Create.Nullable($$createType18);
-const $$createType20 = $models.FileInfo.createFrom;
-const $$createType21 = $Create.Array($$createType20);
+const $$createType16 = $models.ExternalAgentAudit.createFrom;
+const $$createType17 = $Create.Nullable($$createType16);
+const $$createType18 = $models.ProcessInfo.createFrom;
+const $$createType19 = $Create.Array($$createType18);
+const $$createType20 = $models.SystemStats.createFrom;
+const $$createType21 = $Create.Nullable($$createType20);
+const $$createType22 = $models.FileInfo.createFrom;
+const $$createType23 = $Create.Array($$createType22);
