@@ -131,19 +131,6 @@ func TestParseExternalAgentAuditExcludesOnlyItsOwnNottyProcess(t *testing.T) {
 	}
 }
 
-func TestRemoveAuthorizedKeyByFingerprintPreservesOtherLines(t *testing.T) {
-	const target = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKgV3NIV8l5O2KTJ2WcH2O9qOpmG4Bz21PH8b4m9S8TQ codex-example-deploy\n"
-	const content = "# keep this comment\n" + target + "\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDKk1G2x7EiQhzSxJ6vTrzN6UsBzA2T5S0C3xKByZlT3 user-key\n"
-	pub, _, _, _, err := gossh.ParseAuthorizedKey([]byte(target))
-	if err != nil {
-		t.Fatal(err)
-	}
-	got, removed := removeAuthorizedKeyByFingerprint(content, gossh.FingerprintSHA256(pub))
-	if !removed || got != "# keep this comment\n\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDKk1G2x7EiQhzSxJ6vTrzN6UsBzA2T5S0C3xKByZlT3 user-key\n" {
-		t.Fatalf("unexpected revoke result: removed=%v content=%q", removed, got)
-	}
-}
-
 func TestCanRevokeExternalAgentKeyForUser(t *testing.T) {
 	if !canRevokeExternalAgentKeyForUser("root", "root") {
 		t.Fatal("current account must be able to revoke its own key")

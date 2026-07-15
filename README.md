@@ -1,222 +1,107 @@
 # 舟SSH（qssh 0.3.2.1 for mac）
 
-舟SSH是一款面向 macOS 的中文 SSH 客户端，提供终端、SFTP、端口转发、服务器管理和 AI 辅助操作，并新增了面向外部工作机 Agent 的 SSH 密钥监管能力。
+舟SSH 是一款面向 macOS 的中文 SSH 客户端，提供终端、SFTP、端口转发、服务器管理、AI 辅助操作和按指纹组织的 SSH 密钥管理。
 
-本项目移植自 [nanxiangxi/qssh](https://github.com/nanxiangxi/qssh)，在保留原有功能的基础上完成 macOS 适配，并将应用更名为「舟SSH」、内置 AI 助手命名为「舟舟」。
+本项目移植自 [nanxiangxi/qssh](https://github.com/nanxiangxi/qssh)，在保留原有能力的基础上完成 macOS 适配，并将应用命名为「舟SSH」、内置 AI 助手命名为「舟舟」。
 
 ## 功能概览
 
-- 多标签 SSH 终端，支持经典 xterm 模式和结构化模式
-- SFTP 文件管理：上传、下载和在线编辑
+- 多标签 SSH 终端，支持经典 xterm 和结构化终端
+- SFTP 文件管理：上传、下载、预览和在线编辑
 - 连接保存、快速连接、分组与云端同步
 - 本地与远程端口转发
-- 批量命令执行与操作日志
-- 防火墙管理：iptables、firewalld、ufw
-- systemd 服务与进程守护管理
-- 内置 AI 助手：支持 OpenAI 兼容 API，并可在用户授权下执行远端命令
-- 外部 Agent SSH 密钥监管：按指纹归类账号、撤销、恢复和彻底撤销权限
+- 批量命令、操作日志、系统监控和进程守护
+- iptables、firewalld、ufw 防火墙管理
+- 支持 OpenAI 兼容 API 的内置 AI 助手
+- SSH 密钥管理：按指纹归类账号、在线识别、权限审计、撤销、恢复和彻底撤销
 
 ## macOS 适配
 
-- 打包为标准 `.app`，支持 Apple Silicon（arm64）和 Intel（amd64）
-- 数据目录使用 `~/Library/Application Support/qssh`
+- 标准 `.app` 应用包
+- 数据目录：`~/Library/Application Support/qssh`
 - 支持 `⌘+C/V`、`⌘+←/→`、`⌘+Shift+S/U/D` 等 macOS 快捷键
-- 终端中的 `Ctrl+C` 仍保持 Unix 中断语义
+- 终端中的 `Ctrl+C` 保持 Unix 中断语义
 - 终端和编辑器优先使用 SF Mono、Menlo、Monaco
-- Windows 系统托盘适配为 macOS 菜单栏图标
+- 菜单栏图标与多窗口管理
 - 云端同步按实际 macOS 平台注册设备
 
-## 外部 Agent SSH 密钥监管
+## SSH 密钥管理（0.3.2.1）
 
-“外部 Agent”指运行在另一台电脑上的 Codex 或其他自动化 Agent。它使用自己工作机上的 SSH 私钥连接服务器，与舟SSH内置 AI 助手并不是同一个主体。
+右侧工具栏的「SSH 密钥管理」是一张按完整 SHA-256 公钥指纹组织的管理卡。这里的 Agent 指在另一台工作机上使用独立 SSH 私钥连接服务器的 Codex 或其他自动化工具，不是舟SSH内置 AI 助手。
 
-适用范围：当前外部 Agent 密钥监管功能仅面向使用 OpenSSH 的 Linux 服务器（例如 Ubuntu、Debian、CentOS 等）；完整扫描和跨账号撤销需要使用用户名为 `root` 的 SSH 连接，不适用于将 macOS 或 Windows 个人电脑作为被监管目标。
-
-舟SSH右侧工具栏中的“密钥管理”面板是一张按指纹组织的密钥管理卡，可以：
-
-- 按完整 SHA-256 指纹归类该密钥可以登录的所有账号
-- 为每个“指纹 + 账号”单独显示可登录或已撤销状态
-- 某个账号通过对应指纹在线时，显示指纹确认的在线会话数量、终端和脱敏来源
-- 点击账号的“权限”后按需显示所属用户组、无 sudo/受限 sudo/完整 sudo 状态和精确允许命令
-- 非 root 账号在检查前只标记为“权限待检查”；检查后再归类为低权限、受限运维或管理员账号，避免把拥有 sudo 的 `admin` 误标为普通用户
-- 临时撤销公钥并保留服务器端可恢复副本，也可一键恢复
-- 从当前授权和可恢复区彻底撤销公钥；彻底撤销后只能重新安装
-- 保留 Agent 接管提示词和工作机私钥彻底删除提示词，各自一键复制
-- 通用接管提示词允许每位用户自行命名或随机生成名称，并明确禁止专属账号获得提权能力
+当前实现面向 OpenSSH Linux 服务器。root 连接可以扫描和管理 `/root/.ssh/authorized_keys` 与 `/home/*/.ssh/authorized_keys`；普通连接通常只能查看和管理当前登录账号。
 
 ### 指纹与账号
 
-面板以完整公钥指纹作为主键，不依赖容易重复或被修改的公钥注释。同一指纹可以同时出现在 `root`、专属账号或其他普通账号下，每个账号的授权都可以独立管理。
+- 完整 SHA-256 指纹是主键，公钥注释只作为标签展示。
+- 同一指纹可以登录多个账号，每个“指纹 + 账号”授权独立显示和操作。
+- 面板不登记 Agent 名称、私钥路径或专属账号，也不建立本地 Agent 档案。
+- 公钥标签、显示名称和账号名称可以由使用者指定，也可以在接管时随机生成。
 
-普通“撤销”会把对应公钥从 `authorized_keys` 移入同账号的 `authorized_keys.qssh-revoked`，因此之后可以恢复；“彻底撤销”会同时删除当前授权和可恢复副本。两种操作都会在改写前保留 `.qssh.bak` 备份，并使用内容哈希避免覆盖并发修改。
+### 在线识别
 
-`ssh-agent` 不是文件夹，而是工作机上缓存已加载私钥的后台进程；`SSH_AUTH_SOCK` 指向它的临时通信 socket。实际私钥是磁盘文件，通常位于 `~/.ssh/`。彻底删除提示词会先让每位用户核对自己的真实路径和指纹，然后从 ssh-agent 卸载单把密钥并删除磁盘上的私钥和 `.pub`，最后分别验证内存列表和文件状态。
+- 面板结合 `who`、`sshd` 进程和 SSH 成功认证日志识别会话。
+- 只有认证日志能把账号和指纹对应起来时，才显示为该指纹确认上线。
+- 在线信息包括账号、会话数、终端、登录时间和脱敏来源。
+- 扫描只说明登录状态，不能观察 Agent 的思考过程或完整操作内容。
+- 面板打开且窗口可见时每 15 秒自动刷新，也可以手动刷新。
 
-## 推荐的安全接管流程
+### 只读权限审计
 
-1. 外部 Agent 在工作机生成一把独立 Ed25519 密钥。
-2. 私钥只保存在该工作机；Agent只报告公钥、标签、指纹和私钥保存路径。
-3. 用户根据实际环境选择如何完成首次授权；如临时使用 root，应先核对服务器主机指纹。
-4. Agent 创建专属普通账号，不加入 `sudo`、`wheel`、`admin` 等管理组，不写入 sudoers，也不授予其他提权能力。
-5. Agent 将同一公钥安装到专属账号，并从新的 SSH 会话验证可以登录。
-6. 用户在密钥管理卡中自行决定是否保留同指纹的 root 授权；舟SSH不强制取消 root。
-7. 需要暂停接管时撤销专属账号的公钥，需要恢复时再恢复。
-8. 不再需要该密钥时，先彻底撤销服务器公钥，再复制工作机私钥彻底删除提示词清理内存缓存和磁盘文件。
+每个账号的「权限」按钮按需读取用户组和 `sudo -n -l` 输出：
 
-专属账号是 Agent 的常规登录身份；它可以登录，但不能 sudo 或以其他方式提权。
+- 未检查：非 root 账号只显示“权限待检查”，不预先当作普通用户。
+- 低权限账号：没有 sudo 规则。
+- 受限运维账号：只有明确列出的 sudo 命令。
+- 管理员账号：拥有完整 sudo 或账号本身是 root。
 
-<details>
-<summary>查看参考命令</summary>
+权限审计不会执行列出的 sudo 命令，也不提供增加权限功能。名称为 `admin` 不代表权限高低，最终分类以实际用户组和 sudo 规则为准。
 
-在外部 Agent 的工作机生成独立密钥：
+### 撤销、恢复与彻底撤销
 
-```bash
-ssh-keygen \
-  -t ed25519 \
-  -f "$HOME/.ssh/<AGENT_KEY_NAME>" \
-  -N '' \
-  -C '<KEY_LABEL>'
+- 撤销：把对应公钥从 `authorized_keys` 移入同账号的 `authorized_keys.qssh-revoked`，阻止新登录并保留恢复能力。
+- 恢复：把公钥从可恢复区放回 `authorized_keys`。
+- 彻底撤销：同时从当前授权和可恢复区删除对应公钥；之后只能重新安装公钥。
+- 所有操作按完整指纹匹配，并在改写前检查文件、哈希和符号链接状态。
+- 改写前保留 `.qssh.bak` 备份，避免并发修改时静默覆盖。
 
-ssh-keygen -lf "$HOME/.ssh/<AGENT_KEY_NAME>.pub"
-```
+撤销公钥只阻止后续新登录，已经建立的 SSH 会话不会被自动终止。
 
-用户在服务器上临时安装公钥：
+### 两个复制按钮
 
-```bash
-install -d -m 700 /root/.ssh
-printf '%s\n' 'ssh-ed25519 <PUBLIC_KEY> <KEY_LABEL>' \
-  >> /root/.ssh/authorized_keys
-chmod 600 /root/.ssh/authorized_keys
-```
+面板保留两份通用提示词：
 
-外部 Agent 临时使用 root：
+1. Agent 接管提示词：要求创建专属普通账号，不加入 `sudo`、`wheel`、`admin` 等管理组，不写入 sudoers，不授予 `sudo`、`su`、`doas`、`pkexec` 等提权能力。是否保留同指纹的 root 授权由用户决定。
+2. 工作机私钥彻底删除提示词：先由当前用户确认真实指纹和私钥路径，再只从 `ssh-agent` 卸载指定密钥，删除磁盘上的私钥与 `.pub` 文件，并分别验证内存和磁盘状态。
 
-```bash
-ssh -i "$HOME/.ssh/<AGENT_KEY_NAME>" root@<SERVER_HOST>
-```
+提示词是面向所有舟SSH用户的通用模板，不会注入开发者本机的用户名、服务器、指纹或路径。应用内按钮复制出的内容是当前版本的唯一标准模板，README 不再复制一份容易过期的命令副本。
 
-迁移后验证专用用户：
-
-```bash
-ssh -i "$HOME/.ssh/<AGENT_KEY_NAME>" <SERVICE_USER>@<SERVER_HOST>
-```
-
-服务器授权撤销后，在保存私钥的工作机核对并清理：
-
-```bash
-KEY_PATH="$HOME/.ssh/<AGENT_KEY_NAME>"
-
-ssh-keygen -lf "${KEY_PATH}.pub"
-ssh-add -d "${KEY_PATH}" 2>/dev/null || true
-rm -i -- "${KEY_PATH}" "${KEY_PATH}.pub"
-```
-
-不要在服务器上执行最后一组工作机清理命令。删除前应再次核对服务器授权状态、密钥指纹和本地路径。
-
-</details>
-
-## 人 / Agent 操作占比
-
-```text
-操作顺序
-1. [Agent] 生成独立密钥并报告指纹
-2. [用户] 核对指纹并完成首次授权（可按需临时使用 root）
-3. [Agent] 创建无 sudo、无提权权限的专属账号
-4. [Agent] 安装公钥并验证专属账号登录
-——正常工作，未来该agent可直接用此身份登陆，随时接管——
-
-若用户选择撤销该agent访问权限
-1. [用户] 按“指纹 + 账号”暂停授权；需要时可恢复
-2. [用户] 确认不再需要后彻底撤销服务器公钥
-3. [用户] 复制彻底删除提示词，在工作机卸载内存缓存并删除磁盘私钥
-```
-
-## 提供给外部 Agent 的完整提示词
-
-接管提示词是面向所有舟SSH用户的通用模板，不读取开发者或当前设备上的名称、账号、指纹和密钥路径。每位用户都可以自行指定显示名称、公钥标签和专属账号，也可以让 Agent 为本次接管随机生成。提示词不包含服务器地址、密码、公钥或私钥正文。
-
-<details>
-<summary>展开完整提示词</summary>
-
-```text
-你将从当前工作机通过 SSH 接管一台由“舟SSH”管理的服务器。
-
-1. 显示名称、公钥标签和专属账号可以由当前用户指定；用户选择随机或没有指定时，为本次接管生成一组全新的 8 位小写字母数字后缀。公钥标签和专属账号使用 `qssh-agent-<后缀>`，账号必须符合 Linux 用户名格式。生成后向当前用户报告最终名称，不得复用其他用户的数据。
-2. 为本次接管生成独立 Ed25519 密钥，使用上述公钥标签作为注释。私钥只能留在当前工作机；不得复用默认密钥、输出私钥、启用 Agent Forwarding 或绕过主机指纹检查。
-3. 只向用户报告显示名称、专属账号、私钥路径、公钥路径、完整 SHA-256 指纹、标签和完整公钥一行。
-4. 用户可按需临时授权 root；接管结束时是否保留同指纹的 root 授权由用户在舟SSH中决定，不强制取消。
-5. 必须创建或确认最终确定的专属账号。它不得加入 sudo、wheel、admin 等管理组，不得写入 sudoers，不得拥有 sudo、su、doas、pkexec 等提权能力，也不设置可用密码。
-6. 将同一公钥安装到专属账号，设置正确的所有者以及目录 700、文件 600 权限，并从全新 SSH 会话验证可以登录。
-7. 发现目标服务器不符、需要删除数据、修改 SSH 全局配置、开放额外端口或需要任何提权时，立即停止并说明原因。
-8. 完成后报告专属账号、公钥指纹、各账号当前授权、修改内容和遗留风险。提醒用户可以按“指纹 + 账号”分别撤销、恢复或彻底撤销。
-
-现在先生成独立密钥，输出允许报告的信息和已替换完整公钥的安装命令，然后等待用户确认。
-```
-
-</details>
+`ssh-agent` 是缓存已加载私钥的后台进程，不是文件夹；`SSH_AUTH_SOCK` 指向它的通信 socket。私钥文件通常位于工作机的 `~/.ssh/`，但删除前必须让实际使用者确认真实路径。
 
 ## 数据与隐私
 
-密钥管理卡不要求用户登记 Agent 名称、专属账号或工作机私钥路径。它只读取当前服务器扫描返回的脱敏密钥状态，并按 SHA-256 指纹临时归类展示。
+密钥管理扫描返回前端的内容仅包括：
 
-密钥管理卡不会保存 SSH 私钥、公钥正文、服务器密码、Agent 对话或思考过程。远端扫描返回前端的密钥信息只有用户名、算法、标签、指纹和撤销状态。
+- 账号名、算法、公钥标签和 SHA-256 指纹
+- 当前授权或已撤销状态
+- 指纹确认的 SSH 会话元数据
+- 用户主动点击后读取的用户组和 sudo 规则
 
-## 扫描范围与服务器资源
+不会返回或保存 SSH 私钥、公钥正文、服务器密码、Agent 对话或思考过程。
 
-该功能不会在服务器上安装守护程序，也不会创建远端常驻监管进程。面板只通过已有 SSH 连接短暂执行只读命令：
+## 远端资源与限制
 
-- 读取当前权限能够访问的 `authorized_keys`
-- 使用 `who` 查看带终端的会话
-- 使用 `ps` 识别无终端 SSH 会话
-- 在 root 权限下读取近 24 小时的 SSH 成功认证日志，最多取 500 条用于身份归属
+密钥管理不会安装守护程序，也不会创建常驻进程。扫描命令读取授权文件、`who`、`ps` 和可用的 SSH 认证日志后立即退出。完整跨账号扫描、认证日志读取和跨账号操作通常需要 root 连接。
 
-自动扫描间隔为 30 秒，软件窗口不可见时暂停。扫描产生的 shell、`who`、`ps`、`journalctl`、`grep` 和 `tail` 都会在命令结束后退出，不持续占用远端内存，只产生轻微、间歇性的 CPU 与日志读取开销。
+工作机私钥删除和服务器公钥撤销是两件事。删除工作机私钥后，即使恢复服务器公钥，也无法再用原私钥登录。SSD、APFS 或日志型文件系统上的普通文件删除不能保证物理介质级不可恢复；高敏感场景应配合整盘加密和密钥轮换。
 
-## 权限边界与限制
-
-- root 连接可以扫描 `/root/.ssh/authorized_keys` 和 `/home/*/.ssh/authorized_keys`；普通用户通常只能检查自己的授权文件。
-- 撤销、恢复和彻底撤销都按完整指纹精确处理，不按公钥注释模糊匹配。
-- 普通用户只能管理自己的公钥；root 连接可以跨账号管理。
-- 权限详情也是按需只读检查：root 连接可以检查其他账号，普通连接只能检查当前登录账号；查看权限不会执行列出的 sudo 命令。
-- 撤销公钥只阻止后续新登录；已经建立的 SSH 会话仍需单独终止。
-- 工作机私钥彻底删除与服务器公钥撤销是两件事。删除工作机私钥后，即使恢复服务器公钥，也无法再使用原私钥登录。
-- 防火墙、服务管理、AI 命令执行等功能会修改远端状态，请在操作前检查目标服务器和命令内容。
-
-## 例行修复
-安全加固 + 性能优化 + 死代码
-安全:
-- SSH 主机密钥改用 TOFU 校验（ssh/hostkey.go），替换 InsecureIgnoreHostKey，防中间人
-- 云端客户端启用 TOFU 证书固定（cloud/client），替换 InsecureSkipVerify
-- 云端服务器 sync-pull/push/heartbeat 增加令牌认证，堵住匿名拖库
-- WebSocket CheckOrigin 仅放行无 Origin 的原生客户端，防 CSWSH
-- 修复命令注入：新增 ssh/shellsafe.go，firewall/guardian/monitor/sftp 全部
-  改用白名单校验 + shellQuote 单引号转义
-- 凭据/密钥/配置文件权限收紧为 0600，目录 0700，新增 apppaths.WriteSecure
-  （对旧文件补 chmod）；云端 key.pem/sync.json/config.json 同步收紧
-- 云端 nonce 改用 crypto/rand，去掉时间派生的可预测实现
-
-性能:
-- 主循环 500ms 广播增加哈希变更检测，无变化不推送
-- 终端输出轮询改自适应退避（20→100ms）+ 32KB 缓冲
-- 修复 AppLayout/TopBookmarkBar 的 setInterval 泄漏（onUnmounted 清理）
-- vite 拆分 xterm/highlight/markdown chunk，主包 2.9MB→1.6MB
-
-死代码清理:
-- 删除 time 事件链（emitter + RegisterEvent + HelloWorld.vue 消费者）
-- 删除未使用的 main.readFromShell、零启.svg
-- 移除未引用依赖：monaco-editor、@vueuse/core、jszip、splitpanes、
-  vue-splitpane、xterm-addon-serialize
-
-## 系统要求
+## 系统要求与安装
 
 - macOS 11.0 或更高版本
-- Apple Silicon（arm64）或 Intel（amd64）Mac
+- 0.3.2.1 Release 提供 Apple Silicon（arm64）压缩包
+- 源码构建任务也支持 amd64 和 universal 应用包
 
-## 获取与安装
-
-可以从本仓库的 [Releases](https://github.com/qxryz/qsshformac/releases) 页面获取构建产物，也可以按照下方步骤从源码构建。
-
-当前构建产物使用 ad-hoc 签名。如果首次打开被 Gatekeeper 拦截，请确认文件来源可信后执行：
+从 [Releases](https://github.com/qxryz/qsshformac/releases) 下载构建产物。当前发布包使用 ad-hoc 签名；如果首次打开被 Gatekeeper 拦截，请确认文件来源可信后执行：
 
 ```bash
 xattr -cr /path/to/pzssh.app
@@ -224,42 +109,41 @@ xattr -cr /path/to/pzssh.app
 
 ## 从源码构建
 
-需要 Go 1.25+、Node.js 18+ 和 Xcode Command Line Tools。
+需要 Go 1.25+、Node.js 18+、Xcode Command Line Tools 和 Wails v3 CLI。
 
 ```bash
-# 安装 Wails v3 CLI
 go install github.com/wailsapp/wails/v3/cmd/wails3@latest
 
-# 安装前端依赖
 cd frontend
 npm install
 cd ..
 
 # 开发模式
-wails3 dev
+wails3 dev -config ./build/config.yml
 
-# 构建当前架构的 .app，输出到 bin/pzssh.app
-wails3 task darwin:package
+# 当前架构生产应用包：bin/pzssh.app
+wails3 task package
 
-# 分别构建 arm64 与 amd64 便携压缩包
+# arm64 与 amd64 便携压缩包
 wails3 task darwin:package:portable
 
-# 构建通用二进制 .app
+# universal 应用包
 wails3 task darwin:package:universal
+
+# 构建、打开并确认应用进程启动
+./script/build_and_run.sh --verify
 ```
 
 ## 技术栈
 
-- 后端：Go、Wails v3
-- 前端：Vue 3、Pinia、xterm.js、dockview-vue
-- SSH：`golang.org/x/crypto/ssh`
+- 后端：Go 1.25、Wails v3
+- 前端：Vue 3、Pinia、Vite、xterm.js、Dockview、CodeMirror
+- SSH：`golang.org/x/crypto/ssh`、`github.com/pkg/sftp`
 
-## 上游项目与许可证
+## 版本记录
+
+版本变更见 [CHANGELOG.md](./CHANGELOG.md)，当前代码结构见 [CODE_WIKI.md](./CODE_WIKI.md)。
+
+## 上游项目
 
 本项目基于 [nanxiangxi/qssh](https://github.com/nanxiangxi/qssh) 移植和修改。
-
-- 原作者：[nanxiangxi](https://github.com/nanxiangxi)
-- macOS 移植仓库：[qxryz/qsshformac](https://github.com/qxryz/qsshformac)
-- 用途：非商业开源项目
-
-本项目沿用原项目的 **CC BY-NC-SA 4.0** 许可证。使用、修改或分发前，请阅读 [CC BY-NC-SA 4.0 许可说明](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans)。

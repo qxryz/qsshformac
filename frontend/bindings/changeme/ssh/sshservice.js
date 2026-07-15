@@ -346,16 +346,6 @@ export function GetExternalAgentAudit(connID) {
 }
 
 /**
- * GetExternalAgentScopeID 返回稳定的服务器级监管作用域 ID。
- * 同一服务器切换 root 和专用用户后仍使用同一份监管记录。
- * @param {string} connID
- * @returns {$CancellablePromise<string>}
- */
-export function GetExternalAgentScopeID(connID) {
-    return $Call.ByID(3622368146, connID);
-}
-
-/**
  * GetGroupByConnID 根据连接ID获取所属分组
  * @param {string} connID
  * @returns {$CancellablePromise<$models.SSHGroup | null>}

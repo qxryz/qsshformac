@@ -698,7 +698,7 @@ export class ExternalAgentAccountPermissions {
 }
 
 /**
- * ExternalAgentAudit 是外部 Agent 接管监管面板使用的安全快照。
+ * ExternalAgentAudit 是密钥管理面板使用的安全快照。
  */
 export class ExternalAgentAudit {
     /**

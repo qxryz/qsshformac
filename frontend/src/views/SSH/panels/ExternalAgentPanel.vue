@@ -269,7 +269,7 @@ function buildTakeoverPrompt() {
 }
 
 function buildUnloadPrompt() {
-  return `请帮助当前用户在保存 SSH 私钥的工作机上彻底删除舟SSH监管的私钥，不要在服务器上执行。
+  return `请帮助当前用户在保存 SSH 私钥的工作机上彻底删除舟SSH密钥管理卡所对应的私钥，不要在服务器上执行。
 
 这是一份提供给所有舟SSH用户的通用彻底删除协议。不得假定私钥路径、公钥指纹、标签或账号，也不得使用其他用户、其他服务器或以前任务中的值。
 

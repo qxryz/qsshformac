@@ -3,7 +3,6 @@ package ssh
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -12,18 +11,6 @@ import (
 
 	gossh "golang.org/x/crypto/ssh"
 )
-
-// GetExternalAgentScopeID 返回稳定的服务器级监管作用域 ID。
-// 同一服务器切换 root 和专用用户后仍使用同一份监管记录。
-func (s *SSHService) GetExternalAgentScopeID(connID string) (string, error) {
-	conn, err := s.storage.GetConnection(connID)
-	if err != nil {
-		return "", err
-	}
-	raw := fmt.Sprintf("%s:%d", strings.ToLower(strings.TrimSpace(conn.Host)), conn.Port)
-	sum := sha256.Sum256([]byte(raw))
-	return "external-agent-scope-" + hex.EncodeToString(sum[:12]), nil
-}
 
 // ExternalAgentKey 是远端 authorized_keys 的脱敏视图。
 // 公钥正文永远不会通过 Wails binding 返回前端。
@@ -49,7 +36,7 @@ type ExternalAgentSession struct {
 	PID         int    `json:"pid"`
 }
 
-// ExternalAgentAudit 是外部 Agent 接管监管面板使用的安全快照。
+// ExternalAgentAudit 是密钥管理面板使用的安全快照。
 type ExternalAgentAudit struct {
 	Keys          []ExternalAgentKey     `json:"keys"`
 	Sessions      []ExternalAgentSession `json:"sessions"`
@@ -573,30 +560,8 @@ func appendAuthorizedKeyLine(content, line string) string {
 	return strings.TrimRight(content, "\r\n") + "\n" + line + "\n"
 }
 
-func removeAuthorizedKeyByFingerprint(content, fingerprint string) (string, bool) {
-	removed := false
-	kept := make([]string, 0)
-	for _, line := range strings.SplitAfter(content, "\n") {
-		trimmed := strings.TrimSpace(line)
-		pub, _, _, _, parseErr := gossh.ParseAuthorizedKey([]byte(trimmed))
-		if parseErr == nil && gossh.FingerprintSHA256(pub) == fingerprint {
-			removed = true
-			continue
-		}
-		kept = append(kept, line)
-	}
-	return strings.Join(kept, ""), removed
-}
-
 func canRevokeExternalAgentKeyForUser(currentUser, targetUser string) bool {
 	return currentUser != "" && (currentUser == targetUser || currentUser == "root")
-}
-
-func authorizedKeysReadScript() string {
-	return `set -eu
-path="$HOME/.ssh/authorized_keys"
-[ -r "$path" ] && [ ! -L "$path" ] || exit 1
-cat "$path"`
 }
 
 func externalAgentCommandAsUser(currentUser, targetUser, script string) string {

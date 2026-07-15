@@ -48,7 +48,7 @@ const aiTools = [
   { id: 'ai', panelType: 'aiChat', title: 'AI 助手' },
   { id: 'batchCmd', panelType: 'batchCmd', title: '批量命令' },
   { id: 'logs', panelType: 'logs', title: '操作日志' },
-  { id: 'externalAgent', panelType: 'externalAgent', title: '外部 Agent 密钥监管' }
+  { id: 'externalAgent', panelType: 'externalAgent', title: 'SSH 密钥管理' }
 ]
 
 // 检查面板是否激活
