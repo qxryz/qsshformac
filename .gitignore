@@ -26,3 +26,14 @@ bin/data/
 # Build artifacts
 build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
 build/linux/appimage/build/changeme
+
+# Local release instructions, credentials, and checkpoints
+AGENTS.md
+.codex/
+.macos-signing.local.json
+release/
+*.p12
+*.p8
+*.key
+*.key.pem
+*.certSigningRequest
